@@ -1,0 +1,21 @@
+# AUV PID Control System Parameter Configuration
+
+pitch_controller:
+  ros__parameters:
+    kp: 1.79
+    ki: 0.28
+    kd: 1.05
+    dt: 0.05                 # Timer rate: 20 Hz
+    integral_limit: 0.5
+    output_limit: 1.0         # Normalized elevator command limit [-1.0, 1.0]
+    desired_pitch_deg: 0.0    # Manual pitch command override (used when outer loop is inactive)
+
+depth_controller:
+  ros__parameters:
+    kp: 2.92
+    ki: 0.0
+    kd: 1.62
+    dt: 0.1                  # Timer rate: 10 Hz
+    integral_limit: 0.2
+    output_limit_deg: 25.0    # Max pitch command angle in degrees
+    desired_depth_m: 1.0     # Target depth in meters

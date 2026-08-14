@@ -1,0 +1,5 @@
+uint16 elevator_left
+uint16 elevator_right
+uint16 rudder_left
+uint16 rudder_right
+uint16 main_thruster

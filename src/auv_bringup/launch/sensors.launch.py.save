@@ -1,0 +1,33 @@
+from launch import LaunchDescription
+from launch_ros.actions import Node
+
+def generate_launch_description():
+
+    return LaunchDescription([
+
+        Node(
+            package='auv_sensors',
+            executable='depth_sensor',
+            output='screen'
+        ),
+
+        Node(
+            package='auv_sensors',
+            executable='imu_node',
+            output='screen'
+        ),
+
+        Node(
+            package='auv_autonomy',
+            executable='depth_hold',
+            output='screen'
+        ),
+
+        Node(
+            package='auv_autonomy',
+            executable='roll_stabilizer',
+            output='screen'
+        ),
+
+        
+    ])

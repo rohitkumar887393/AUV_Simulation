@@ -1,0 +1,52 @@
+ideal_auv:
+  ros__parameters:
+    simulation_rate: 50.0
+
+    # Actuator Time Constants (seconds)
+    servo_time_constant: 0.10
+    thruster_time_constant: 0.20
+
+    # INITIAL ESTIMATES — TO BE REPLACED BY HARDWARE/TEST DATA
+    # Rigid Body Mass & Inertia Properties
+    mass: 25.0                 # Mass (kg)
+    ix: 0.5                    # Roll Inertia (kg*m^2)
+    iy: 2.0                    # Pitch Inertia (kg*m^2)
+    iz: 2.0                    # Yaw Inertia (kg*m^2)
+
+    # Hydrostatic Properties
+    water_density: 1025.0      # Water Density (kg/m^3)
+    displaced_volume: 0.0247   # Displaced Volume (m^3) -> Moderately buoyant for faster surface return (~8N net lift)
+    gravity: 9.81              # Gravity (m/s^2)
+    neutral_buoyancy_ratio: 1.000 # Base buoyancy ratio
+    z_bg: 0.03                 # Metacentric height offset between CG and CB (m) -> CB above CG
+
+    # Thruster Force Model (Quadratic T = Kt * cmd * |cmd|)
+    thrust_coefficient: 120.0  # Max thrust force (N) at 1900 PWM (+1.0 norm)
+
+    # Hydrodynamic Drag Coefficients (Body Frame)
+    linear_drag_x: 15.0        # Surge linear drag (N / (m/s))
+    quadratic_drag_x: 25.0     # Surge quadratic drag (N / (m/s)^2)
+
+    linear_drag_y: 35.0        # Sway linear drag
+    quadratic_drag_y: 60.0     # Sway quadratic drag
+
+    linear_drag_z: 15.0        # Heave linear drag (N / (m/s))
+    quadratic_drag_z: 40.0     # Heave quadratic drag (N / (m/s)^2)
+
+    linear_drag_roll: 2.0      # Roll angular damping
+    quadratic_drag_roll: 5.0
+
+    linear_drag_pitch: 25.0    # Pitch angular damping (N*m*s/rad)
+    quadratic_drag_pitch: 40.0
+
+    linear_drag_yaw: 12.0      # Yaw angular damping (calibrated for 6.5m turning radius)
+    quadratic_drag_yaw: 35.0
+
+    # Dynamic Pressure Lift & Moment Coefficients (Authority = q_dyn * coeff * deflection)
+    # q_dyn = 0.5 * rho * u^2
+    elevator_lift_coeff: 0.015 # Pitch moment per unit dynamic pressure per unit elevator
+    rudder_lift_coeff: 0.0035  # Yaw moment calibrated for 6.5m turning radius
+    roll_lift_coeff: 0.004     # Roll moment per unit dynamic pressure per unit differential
+
+    maximum_forward_velocity: 4.0
+    maximum_angular_velocity: 60.0

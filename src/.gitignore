@@ -1,0 +1,26 @@
+# ROS 2 Build / Install / Log folders
+build/
+install/
+log/
+COLCON_IGNORE
+
+# Python cache & virtual environment
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+ENV/
+env/
+
+# IDE & Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary & Scratch files
+scratch/
+.DS_Store
