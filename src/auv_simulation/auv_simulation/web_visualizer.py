@@ -62,7 +62,9 @@ simulation_state = {
         "target_distance": 0.0,
         "current_distance": 0.0,
         "distance_remaining": 0.0,
-        "throttle_cmd": 0.0
+        "throttle_cmd": 0.0,
+        "active_depth_target": 0.0,
+        "active_heading_target": 0.0
     },
     "physics": {
         "u": 0.0,
@@ -117,38 +119,38 @@ HTML_CONTENT = """<!DOCTYPE html>
             top: 0;
             left: 0;
             width: 100vw;
-            height: 48px;
-            background: rgba(3, 14, 28, 0.92);
+            height: 52px;
+            background: rgba(3, 14, 28, 0.94);
             border-bottom: 2px solid #00a8e8;
-            box-shadow: 0 4px 20px rgba(0, 168, 232, 0.25);
+            box-shadow: 0 4px 20px rgba(0, 168, 232, 0.3);
             display: flex;
             align-items: center;
-            padding: 0 20px;
-            gap: 14px;
+            padding: 0 24px;
+            gap: 18px;
             z-index: 10;
-            font-size: 13px;
+            font-size: 14px;
             letter-spacing: 1px;
         }
 
         .hud-pill {
             display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 4px 12px;
-            border-radius: 14px;
+            gap: 10px;
+            padding: 6px 14px;
+            border-radius: 16px;
             border: 1px solid #1c3d5a;
-            background: rgba(10, 25, 47, 0.7);
+            background: rgba(10, 25, 47, 0.8);
         }
 
         .dot-indicator {
-            width: 9px;
-            height: 9px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
             display: inline-block;
         }
 
-        .dot-disarmed { background: #d90429; box-shadow: 0 0 8px #d90429; }
-        .dot-armed { background: #00f5d4; box-shadow: 0 0 10px #00f5d4; }
+        .dot-disarmed { background: #d90429; box-shadow: 0 0 10px #d90429; }
+        .dot-armed { background: #00f5d4; box-shadow: 0 0 12px #00f5d4; }
 
         .hud-divider {
             color: #1c3d5a;
@@ -156,10 +158,10 @@ HTML_CONTENT = """<!DOCTYPE html>
         }
 
         .gain-bar-container {
-            width: 70px;
-            height: 8px;
+            width: 80px;
+            height: 10px;
             background: #0d2238;
-            border-radius: 4px;
+            border-radius: 5px;
             overflow: hidden;
             border: 1px solid #00a8e8;
         }
@@ -168,16 +170,17 @@ HTML_CONTENT = """<!DOCTYPE html>
             height: 100%;
             width: 75%;
             background: linear-gradient(90deg, #0077b6, #00f5d4);
-            box-shadow: 0 0 8px #00f5d4;
+            box-shadow: 0 0 10px #00f5d4;
         }
 
         .badge-box {
-            padding: 3px 10px;
-            border-radius: 4px;
+            padding: 5px 12px;
+            border-radius: 5px;
             border: 1px solid #00a8e8;
             background: rgba(0, 168, 232, 0.15);
             color: #00f5d4;
             font-weight: bold;
+            font-size: 13px;
         }
 
         .badge-disabled {
@@ -189,31 +192,32 @@ HTML_CONTENT = """<!DOCTYPE html>
         .badge-enabled {
             border-color: #00f5d4;
             color: #00f5d4;
-            background: rgba(0, 245, 212, 0.18);
-            box-shadow: 0 0 8px rgba(0, 245, 212, 0.3);
+            background: rgba(0, 245, 212, 0.2);
+            box-shadow: 0 0 10px rgba(0, 245, 212, 0.4);
         }
 
         /* Left HUD Telemetry Panel */
         #telemetry-panel {
             position: absolute;
-            top: 60px;
-            left: 15px;
-            width: 320px;
-            background: rgba(3, 14, 28, 0.92);
-            border: 1px solid #00a8e8;
-            border-radius: 6px;
-            padding: 12px 14px;
-            box-shadow: 0 0 25px rgba(0, 0, 0, 0.7);
+            top: 64px;
+            left: 16px;
+            width: 380px;
+            background: rgba(3, 14, 28, 0.94);
+            border: 1.5px solid #00a8e8;
+            border-radius: 8px;
+            padding: 12px 16px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
             z-index: 10;
         }
 
         .panel-header {
-            font-size: 13px;
+            font-size: 14px;
             color: #00f5d4;
-            border-bottom: 1px solid #1c3d5a;
-            padding-bottom: 5px;
-            margin-bottom: 8px;
+            border-bottom: 1.5px solid #1c3d5a;
+            padding-bottom: 6px;
+            margin-bottom: 10px;
             letter-spacing: 1.5px;
+            font-weight: bold;
             display: flex;
             justify-content: space-between;
         }
@@ -221,93 +225,142 @@ HTML_CONTENT = """<!DOCTYPE html>
         .telem-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 4px;
-            font-size: 12px;
+            margin-bottom: 6px;
+            font-size: 13px;
         }
 
-        .telem-label { color: #5c7d99; }
+        .telem-label { color: #8d99ae; }
         .telem-val { color: #ffffff; font-weight: bold; }
         .telem-val-highlight { color: #ffb703; font-weight: bold; }
 
-        /* Crosshair Pitch/Roll Dial */
-        #crosshair-box {
+        /* Left Side: Mission Control Panel (Shifted to Left) */
+        #mission-panel {
             position: absolute;
-            top: 15px;
-            right: 12px;
-            width: 60px;
-            height: 60px;
-            border: 1px solid #00a8e8;
-            border-radius: 50%;
-            background: rgba(10, 25, 47, 0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        #crosshair-dot {
-            width: 7px;
-            height: 7px;
-            background: #ef233c;
-            border-radius: 50%;
-            box-shadow: 0 0 8px #ef233c;
-            position: absolute;
-        }
-
-        /* Autonomy Closed-Loop PID HUD Panel (Requirement 12) */
-        #autonomy-pid-panel {
-            position: absolute;
-            top: 360px;
-            left: 15px;
-            width: 330px;
-            background: rgba(3, 14, 28, 0.94);
+            top: 350px;
+            left: 16px;
+            width: 380px;
+            background: rgba(3, 14, 28, 0.96);
             border: 1.5px solid #00f5d4;
-            border-radius: 6px;
-            padding: 10px 14px;
-            box-shadow: 0 0 25px rgba(0, 245, 212, 0.2);
+            border-radius: 8px;
+            padding: 14px 16px;
+            box-shadow: 0 0 30px rgba(0, 245, 212, 0.25);
             z-index: 10;
-            font-size: 12px;
         }
 
-        .hud-section-header {
-            color: #00f5d4;
-            font-size: 11px;
+        .mission-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 9px;
+            font-size: 13px;
             font-weight: bold;
-            margin-top: 6px;
-            margin-bottom: 3px;
-            letter-spacing: 1px;
         }
 
-        .hud-divider-line {
-            border-bottom: 1px solid #1c3d5a;
-            margin: 5px 0;
+        .mission-input {
+            width: 100px;
+            height: 30px;
+            background: #0a192f;
+            border: 1.5px solid #00a8e8;
+            color: #00f5d4;
+            padding: 2px 8px;
+            border-radius: 5px;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: bold;
+            text-align: right;
         }
 
-        /* Physics Debug Data Panel (Requirement 13) */
-        #physics-debug-panel {
-            position: absolute;
-            top: 290px;
-            right: 15px;
-            width: 310px;
-            background: rgba(3, 14, 28, 0.94);
-            border: 1px solid #ffb703;
+        .mission-btn-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        .mission-btn {
+            padding: 8px 6px;
             border-radius: 6px;
-            padding: 10px 14px;
-            box-shadow: 0 0 25px rgba(255, 183, 3, 0.2);
-            z-index: 10;
+            font-family: inherit;
             font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            border: 1.5px solid transparent;
+            transition: all 0.2s;
         }
 
-        /* Bottom Propulsion Panel */
+        .btn-start {
+            flex: 2;
+            background: rgba(0, 245, 212, 0.25);
+            color: #00f5d4;
+            border-color: #00f5d4;
+            font-size: 13px;
+        }
+        .btn-start:hover {
+            background: #00f5d4;
+            color: #030a16;
+            box-shadow: 0 0 16px #00f5d4;
+        }
+
+        .btn-stop {
+            flex: 1;
+            background: rgba(217, 4, 41, 0.25);
+            color: #ef233c;
+            border-color: #d90429;
+        }
+        .btn-stop:hover {
+            background: #d90429;
+            color: #ffffff;
+            box-shadow: 0 0 16px #d90429;
+        }
+
+        .btn-reset {
+            flex: 1;
+            background: rgba(255, 183, 3, 0.25);
+            color: #ffb703;
+            border-color: #ffb703;
+        }
+        .btn-reset:hover {
+            background: #ffb703;
+            color: #030a16;
+            box-shadow: 0 0 16px #ffb703;
+        }
+
+        .mission-status-box {
+            background: rgba(10, 25, 47, 0.9);
+            border: 1.5px solid #1c3d5a;
+            border-radius: 6px;
+            padding: 7px;
+            text-align: center;
+            margin-top: 6px;
+        }
+
+        .mission-status-title {
+            font-size: 11px;
+            color: #8d99ae;
+            letter-spacing: 1.5px;
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+
+        .mission-status-val {
+            font-size: 18px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            color: #00f5d4;
+            text-shadow: 0 0 10px rgba(0, 245, 212, 0.5);
+        }
+
+        /* Left Side: Propulsion Panel */
         #propulsion-panel {
             position: absolute;
-            bottom: 15px;
-            left: 15px;
-            width: 330px;
-            background: rgba(3, 14, 28, 0.92);
-            border: 1px solid #00a8e8;
-            border-radius: 6px;
-            padding: 10px 14px;
-            box-shadow: 0 0 25px rgba(0, 0, 0, 0.7);
+            top: 668px;
+            left: 16px;
+            width: 380px;
+            background: rgba(3, 14, 28, 0.94);
+            border: 1.5px solid #00a8e8;
+            border-radius: 8px;
+            padding: 10px 16px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
             z-index: 10;
         }
 
@@ -320,12 +373,13 @@ HTML_CONTENT = """<!DOCTYPE html>
             justify-content: space-between;
             font-size: 11px;
             margin-bottom: 2px;
+            font-weight: bold;
         }
 
         .pwm-track {
-            height: 6px;
+            height: 9px;
             background: #0d2238;
-            border-radius: 3px;
+            border-radius: 5px;
             overflow: hidden;
             border: 1px solid #1c3d5a;
         }
@@ -336,116 +390,99 @@ HTML_CONTENT = """<!DOCTYPE html>
             background: #00f5d4;
         }
 
-        /* Mission Control Panel */
-        #mission-panel {
+        /* Left Side: Physics Debug Data Panel */
+        #physics-debug-panel {
             position: absolute;
-            top: 60px;
-            right: 15px;
-            width: 310px;
-            background: rgba(3, 14, 28, 0.92);
-            border: 1px solid #00a8e8;
-            border-radius: 6px;
-            padding: 12px 14px;
-            box-shadow: 0 0 25px rgba(0, 0, 0, 0.7);
+            top: 818px;
+            left: 16px;
+            width: 380px;
+            background: rgba(3, 14, 28, 0.94);
+            border: 1.5px solid #ffb703;
+            border-radius: 8px;
+            padding: 10px 16px;
+            box-shadow: 0 0 30px rgba(255, 183, 3, 0.25);
+            z-index: 10;
+            font-size: 12px;
+        }
+
+        /* Full Right Side: Unified Mission & Control Telemetry Panel */
+        #unified-telemetry-panel {
+            position: absolute;
+            top: 64px;
+            right: 16px;
+            width: 480px;
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+            background: rgba(3, 14, 28, 0.96);
+            border: 2px solid #00f5d4;
+            border-radius: 10px;
+            padding: 18px 22px;
+            box-shadow: 0 0 35px rgba(0, 245, 212, 0.3);
             z-index: 10;
         }
 
-        .mission-row {
+        #unified-telemetry-panel .panel-header {
+            font-size: 16px;
+            color: #00f5d4;
+            border-bottom: 1.5px solid #00f5d4;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+            letter-spacing: 1.5px;
+            font-weight: bold;
+        }
+
+        #unified-telemetry-panel .hud-section-header {
+            color: #00f5d4;
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 12px;
+            margin-bottom: 6px;
+            letter-spacing: 1.2px;
+        }
+
+        #unified-telemetry-panel .hud-divider-line {
+            border-bottom: 1px solid #1c3d5a;
+            margin: 8px 0;
+        }
+
+        #unified-telemetry-panel .telem-row {
             display: flex;
             justify-content: space-between;
-            align-items: center;
             margin-bottom: 8px;
-            font-size: 12px;
+            font-size: 15px;
+            line-height: 1.4;
         }
 
-        .mission-input {
-            width: 90px;
-            background: #0a192f;
-            border: 1px solid #00a8e8;
-            color: #00f5d4;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-family: inherit;
-            font-size: 12px;
-            text-align: right;
+        #unified-telemetry-panel .telem-label {
+            color: #8d99ae;
+            font-size: 14px;
         }
 
-        .mission-btn-row {
-            display: flex;
-            gap: 6px;
-            margin-top: 10px;
-            margin-bottom: 10px;
-        }
-
-        .mission-btn {
-            flex: 1;
-            padding: 8px 4px;
-            border-radius: 4px;
-            font-family: inherit;
-            font-size: 11px;
-            font-weight: bold;
-            cursor: pointer;
-            border: 1px solid transparent;
-            transition: all 0.2s;
-        }
-
-        .btn-start {
-            background: rgba(0, 245, 212, 0.2);
-            color: #00f5d4;
-            border-color: #00f5d4;
-        }
-        .btn-start:hover {
-            background: #00f5d4;
-            color: #030a16;
-            box-shadow: 0 0 10px #00f5d4;
-        }
-
-        .btn-stop {
-            background: rgba(217, 4, 41, 0.2);
-            color: #ef233c;
-            border-color: #d90429;
-        }
-        .btn-stop:hover {
-            background: #d90429;
+        #unified-telemetry-panel .telem-val {
             color: #ffffff;
-            box-shadow: 0 0 10px #d90429;
-        }
-
-        .btn-reset {
-            background: rgba(255, 183, 3, 0.2);
-            color: #ffb703;
-            border-color: #ffb703;
-        }
-        .btn-reset:hover {
-            background: #ffb703;
-            color: #030a16;
-            box-shadow: 0 0 10px #ffb703;
-        }
-
-        .mission-status-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            padding-top: 6px;
-            border-top: 1px dashed #1c3d5a;
-        }
-
-        .mission-status-val {
             font-weight: bold;
-            color: #ffb703;
+            font-size: 15px;
         }
+
+        #unified-telemetry-panel .telem-val-highlight {
+            color: #ffb703;
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+
 
         /* Camera Controls */
         #cam-mode-box {
             position: absolute;
-            bottom: 15px;
-            right: 15px;
-            background: rgba(3, 14, 28, 0.92);
-            border: 1px solid #00a8e8;
+            bottom: 16px;
+            right: 16px;
+            background: rgba(3, 14, 28, 0.94);
+            border: 1.5px solid #00a8e8;
             border-radius: 6px;
             padding: 8px 12px;
             display: flex;
-            gap: 6px;
+            gap: 8px;
             z-index: 10;
         }
 
@@ -453,11 +490,12 @@ HTML_CONTENT = """<!DOCTYPE html>
             background: rgba(0, 119, 182, 0.4);
             color: #00f5d4;
             border: 1px solid #00a8e8;
-            padding: 5px 10px;
+            padding: 6px 12px;
             border-radius: 4px;
             cursor: pointer;
             font-family: inherit;
-            font-size: 11px;
+            font-size: 12px;
+            font-weight: bold;
             transition: all 0.2s;
         }
 
@@ -475,7 +513,7 @@ HTML_CONTENT = """<!DOCTYPE html>
 
     <!-- Top HUD Status Bar -->
     <div id="top-hud-bar">
-        <div class="hud-pill">
+        <div class="hud-pill" onclick="toggleArm()" style="cursor: pointer;" title="Click to Arm / Disarm (or Spacebar)">
             <span class="dot-indicator dot-disarmed" id="dot-armed"></span>
             <span id="txt-armed" style="font-weight: bold;">DISARMED</span>
         </div>
@@ -506,13 +544,10 @@ HTML_CONTENT = """<!DOCTYPE html>
     <div id="telemetry-panel">
         <div class="panel-header">
             <span>TELEMETRY DATA</span>
-            <span style="font-size: 11px; color: #8d99ae;" id="txt-packets">0 pkts</span>
+            <span style="font-size: 12px; color: #8d99ae;" id="txt-packets">0 pkts</span>
         </div>
 
         <div style="position: relative;">
-            <div id="crosshair-box">
-                <div id="crosshair-dot"></div>
-            </div>
 
             <div class="telem-row"><span class="telem-label">ROLL:</span> <span class="telem-val" id="val-roll">+0.0°</span></div>
             <div class="telem-row"><span class="telem-label">PITCH:</span> <span class="telem-val" id="val-pitch">+0.0°</span></div>
@@ -520,9 +555,9 @@ HTML_CONTENT = """<!DOCTYPE html>
 
             <div style="height: 6px;"></div>
 
-            <div class="telem-row"><span class="telem-label">SPEED X:</span> <span class="telem-val" id="val-vx">+0.0 m/s</span></div>
-            <div class="telem-row"><span class="telem-label">SPEED Y:</span> <span class="telem-val" id="val-vy">+0.0 m/s</span></div>
-            <div class="telem-row"><span class="telem-label">SPEED Z:</span> <span class="telem-val" id="val-vz">+0.0 m/s</span></div>
+            <div class="telem-row"><span class="telem-label">SPEED X:</span> <span class="telem-val" id="val-vx">+0.00 m/s</span></div>
+            <div class="telem-row"><span class="telem-label">SPEED Y:</span> <span class="telem-val" id="val-vy">+0.00 m/s</span></div>
+            <div class="telem-row"><span class="telem-label">SPEED Z:</span> <span class="telem-val" id="val-vz">+0.00 m/s</span></div>
 
             <div style="height: 6px;"></div>
 
@@ -533,59 +568,92 @@ HTML_CONTENT = """<!DOCTYPE html>
         </div>
     </div>
 
-    <!-- Autonomy Closed-Loop PID HUD Panel (Requirement 12) -->
-    <div id="autonomy-pid-panel">
-        <div class="panel-header" style="color: #00f5d4; border-color: #00f5d4; font-size: 13px;">AUTONOMY CLOSED-LOOP SIGNAL CHAIN</div>
-        
+    <!-- Unified Mission & Control Telemetry Panel -->
+    <div id="unified-telemetry-panel">
+        <div class="panel-header" style="color: #00f5d4; border-color: #00f5d4; font-size: 14px;">MISSION & CONTROL TELEMETRY</div>
+
+        <div class="hud-section-header">MISSION</div>
+        <div class="telem-row"><span class="telem-label">PHASE:</span> <span class="telem-val-highlight" id="ut-phase">IDLE</span></div>
+        <div class="telem-row"><span class="telem-label">MISSION TIME:</span> <span class="telem-val" id="ut-time">00:00 / 30:00</span></div>
+
+        <div class="hud-divider-line"></div>
+
         <div class="hud-section-header">DEPTH</div>
-        <div class="telem-row"><span class="telem-label">TARGET:</span> <span class="telem-val" id="pid-depth-tgt">2.00 m</span></div>
-        <div class="telem-row"><span class="telem-label">CURRENT:</span> <span class="telem-val" id="pid-depth-cur">0.50 m</span></div>
-        <div class="telem-row"><span class="telem-label">ERROR:</span> <span class="telem-val-highlight" id="pid-depth-err">+1.50 m</span></div>
-        <div class="telem-row"><span class="telem-label">PID OUTPUT:</span> <span class="telem-val" id="pid-depth-out">+0.0</span></div>
+        <div class="telem-row"><span class="telem-label">TARGET:</span> <span class="telem-val" id="ut-depth-tgt">0.00 m</span></div>
+        <div class="telem-row"><span class="telem-label">CURRENT:</span> <span class="telem-val" id="ut-depth-cur">0.50 m</span></div>
+        <div class="telem-row"><span class="telem-label">ERROR:</span> <span class="telem-val-highlight" id="ut-depth-err">+0.00 m</span></div>
+        <div class="telem-row"><span class="telem-label">PID OUTPUT:</span> <span class="telem-val" id="ut-depth-out">+0.0</span></div>
 
         <div class="hud-divider-line"></div>
 
         <div class="hud-section-header">HEADING</div>
-        <div class="telem-row"><span class="telem-label">TARGET:</span> <span class="telem-val" id="pid-head-tgt">90.0°</span></div>
-        <div class="telem-row"><span class="telem-label">CURRENT:</span> <span class="telem-val" id="pid-head-cur">0.0°</span></div>
-        <div class="telem-row"><span class="telem-label">ERROR:</span> <span class="telem-val-highlight" id="pid-head-err">+90.0°</span></div>
-        <div class="telem-row"><span class="telem-label">PID OUTPUT:</span> <span class="telem-val" id="pid-head-out">+0.0</span></div>
+        <div class="telem-row"><span class="telem-label">TARGET:</span> <span class="telem-val" id="ut-head-tgt">0.0°</span></div>
+        <div class="telem-row"><span class="telem-label">CURRENT:</span> <span class="telem-val" id="ut-head-cur">0.0°</span></div>
+        <div class="telem-row"><span class="telem-label">ERROR:</span> <span class="telem-val-highlight" id="ut-head-err">+0.0°</span></div>
+        <div class="telem-row"><span class="telem-label">PID OUTPUT:</span> <span class="telem-val" id="ut-head-out">+0.0</span></div>
 
         <div class="hud-divider-line"></div>
 
-        <div class="hud-section-header">DISTANCE</div>
-        <div class="telem-row"><span class="telem-label">TARGET:</span> <span class="telem-val" id="pid-dist-tgt">10.0 m</span></div>
-        <div class="telem-row"><span class="telem-label">TRAVELLED:</span> <span class="telem-val" id="pid-dist-trav">0.0 m</span></div>
-        <div class="telem-row"><span class="telem-label">REMAINING:</span> <span class="telem-val-highlight" id="pid-dist-rem">10.0 m</span></div>
-        <div class="telem-row"><span class="telem-label">PID OUTPUT:</span> <span class="telem-val" id="pid-dist-out">0.00</span></div>
+        <div class="hud-section-header">SPEED</div>
+        <div class="telem-row"><span class="telem-label">TARGET:</span> <span class="telem-val" id="ut-spd-tgt">0.00 m/s</span></div>
+        <div class="telem-row"><span class="telem-label">COMMAND:</span> <span class="telem-val" id="ut-spd-cmd">0.00 m/s</span></div>
+        <div class="telem-row"><span class="telem-label">ACTUAL:</span> <span class="telem-val-highlight" id="ut-spd-act">0.00 m/s</span></div>
 
         <div class="hud-divider-line"></div>
 
         <div class="hud-section-header">ACTUATOR OUTPUT</div>
-        <div class="telem-row"><span class="telem-label">THRUSTER CMD:</span> <span class="telem-val" id="act-thr-cmd">1500 us</span></div>
-        <div class="telem-row"><span class="telem-label">ELEVATOR CMD:</span> <span class="telem-val" id="act-elev-cmd">1500 us</span></div>
-        <div class="telem-row"><span class="telem-label">RUDDER CMD:</span> <span class="telem-val" id="act-rud-cmd">1500 us</span></div>
+        <div class="telem-row"><span class="telem-label">THRUSTER CMD:</span> <span class="telem-val" id="ut-act-thr">1500 us</span></div>
+        <div class="telem-row"><span class="telem-label">ELEVATOR CMD:</span> <span class="telem-val" id="ut-act-elev">1500 us</span></div>
+        <div class="telem-row"><span class="telem-label">RUDDER CMD:</span> <span class="telem-val" id="ut-act-rud">1500 us</span></div>
 
         <div class="hud-divider-line"></div>
 
         <div class="hud-section-header">PHYSICAL STATE</div>
-        <div class="telem-row"><span class="telem-label">FORWARD SPEED:</span> <span class="telem-val" id="phys-fwd-speed">0.00 m/s</span></div>
-        <div class="telem-row"><span class="telem-label">VERTICAL SPEED:</span> <span class="telem-val" id="phys-vert-speed">0.00 m/s</span></div>
-        <div class="telem-row"><span class="telem-label">PITCH:</span> <span class="telem-val" id="phys-pitch">0.0°</span></div>
-        <div class="telem-row"><span class="telem-label">YAW:</span> <span class="telem-val" id="phys-yaw">0.0°</span></div>
-        <div class="telem-row"><span class="telem-label">ROLL:</span> <span class="telem-val" id="phys-roll">0.0°</span></div>
-        <div class="telem-row"><span class="telem-label">DEPTH:</span> <span class="telem-val" id="phys-depth">0.50 m</span></div>
+        <div class="telem-row"><span class="telem-label">FORWARD SPEED:</span> <span class="telem-val" id="ut-phys-fwd">0.00 m/s</span></div>
+        <div class="telem-row"><span class="telem-label">VERTICAL SPEED:</span> <span class="telem-val" id="ut-phys-vz">0.00 m/s</span></div>
+        <div class="telem-row"><span class="telem-label">PITCH:</span> <span class="telem-val" id="ut-phys-pitch">0.0°</span></div>
+        <div class="telem-row"><span class="telem-label">YAW:</span> <span class="telem-val" id="ut-phys-yaw">0.0°</span></div>
+        <div class="telem-row"><span class="telem-label">ROLL:</span> <span class="telem-val" id="ut-phys-roll">0.0°</span></div>
+        <div class="telem-row"><span class="telem-label">DEPTH:</span> <span class="telem-val" id="ut-phys-depth">0.50 m</span></div>
+    </div>
 
-        <div class="hud-divider-line"></div>
+    <!-- Left-Side Mission Control Panel -->
+    <div id="mission-panel">
+        <div class="panel-header">MISSION CONTROL</div>
 
-        <div style="font-size: 10px; color: #00f5d4; text-align: center; font-weight: bold; margin-top: 4px; letter-spacing: 0.5px;">
-            MISSION → TARGET → PID → ACTUATOR → VEHICLE → SENSOR → PID FEEDBACK
+        <div class="mission-row">
+            <span class="telem-label">TARGET DEPTH</span>
+            <span><input type="number" id="input-depth" step="0.5" value="20.00" class="mission-input"> m</span>
+        </div>
+        <div class="mission-row">
+            <span class="telem-label">TARGET SPEED</span>
+            <span><input type="number" id="input-speed" step="0.05" value="1.00" class="mission-input"> m/s</span>
+        </div>
+        <div class="mission-row">
+            <span class="telem-label">TARGET HEADING</span>
+            <span><input type="number" id="input-heading" step="1.0" value="90.0" class="mission-input"> deg</span>
+        </div>
+        <div class="mission-row">
+            <span class="telem-label">MISSION TIME</span>
+            <span><input type="number" id="input-duration" step="1" value="30" class="mission-input"> min</span>
+        </div>
+
+        <div class="mission-btn-row">
+            <button class="mission-btn btn-start" onclick="startMission()">START MISSION</button>
+            <button class="mission-btn btn-stop" onclick="stopMission()">STOP MISSION</button>
+        </div>
+
+        <div class="mission-status-box">
+            <div class="mission-status-title">MISSION STATUS</div>
+            <div id="txt-mission-status" class="mission-status-val">IDLE</div>
         </div>
     </div>
 
-    <!-- Physics Debug Data Panel (Requirement 13) -->
+
+
+    <!-- Physics Debug Data Panel -->
     <div id="physics-debug-panel">
-        <div class="panel-header" style="color: #ffb703; border-color: #ffb703; font-size: 12px;">PHYSICS DEBUG TELEMETRY</div>
+        <div class="panel-header" style="color: #ffb703; border-color: #ffb703; font-size: 14px;">PHYSICS DEBUG TELEMETRY</div>
         <div class="telem-row"><span class="telem-label">BUOYANCY FORCE:</span> <span class="telem-val-highlight" id="phys-buoyancy">+12.3 N</span></div>
         <div class="telem-row"><span class="telem-label">THRUST FORCE:</span> <span class="telem-val" id="phys-thrust">+0.0 N</span></div>
         <div class="telem-row"><span class="telem-label">FORWARD DRAG:</span> <span class="telem-val" id="phys-drag">-0.0 N</span></div>
@@ -597,7 +665,7 @@ HTML_CONTENT = """<!DOCTYPE html>
 
     <!-- Bottom Propulsion Panel -->
     <div id="propulsion-panel">
-        <div class="panel-header" style="font-size: 12px;">PROPULSION & CONTROL SURFACES</div>
+        <div class="panel-header" style="font-size: 14px;">PROPULSION & CONTROL SURFACES</div>
 
         <div class="pwm-bar-wrapper">
             <div class="pwm-label-row">
@@ -624,36 +692,7 @@ HTML_CONTENT = """<!DOCTYPE html>
         </div>
     </div>
 
-    <!-- Mission Control Panel -->
-    <div id="mission-panel">
-        <div class="panel-header">MISSION CONTROL</div>
-
-        <div class="mission-row">
-            <span class="telem-label">Target Depth:</span>
-            <span><input type="number" id="input-depth" step="0.1" value="2.00" class="mission-input"> m</span>
-        </div>
-        <div class="mission-row">
-            <span class="telem-label">Target Heading:</span>
-            <span><input type="number" id="input-heading" step="1.0" value="90.0" class="mission-input"> deg</span>
-        </div>
-        <div class="mission-row">
-            <span class="telem-label">Target Distance:</span>
-            <span><input type="number" id="input-distance" step="0.5" value="5.00" class="mission-input"> m</span>
-        </div>
-
-        <div class="mission-btn-row">
-            <button class="mission-btn btn-start" onclick="startMission()">START MISSION</button>
-            <button class="mission-btn btn-stop" onclick="stopMission()">STOP MISSION</button>
-            <button class="mission-btn btn-reset" onclick="resetSim()">RESET</button>
-        </div>
-
-        <div class="mission-status-row">
-            <span class="telem-label">Mission Status:</span>
-            <span id="txt-mission-status" class="mission-status-val">IDLE</span>
-        </div>
-    </div>
-
-    <!-- Camera Mode Buttons (Non-control) -->
+    <!-- Camera Mode Buttons -->
     <div id="cam-mode-box">
         <button class="cam-btn" onclick="setCameraMode('orbit')">Free Orbit</button>
         <button class="cam-btn" onclick="setCameraMode('follow')">Follow AUV</button>
@@ -700,53 +739,40 @@ HTML_CONTENT = """<!DOCTYPE html>
             surfaceGeo.position.y = 0;
             scene.add(surfaceGeo);
 
-            // Seabed Plane (Depth Z=20m -> Three.js Y=-20)
-            const seabedGeo = new THREE.GridHelper(100, 50, 0x8b5a2b, 0x3d2314);
-            seabedGeo.position.y = -20;
-            scene.add(seabedGeo);
-
-            // Origin Marker (Surface origin)
-            const originGeo = new THREE.SphereGeometry(0.15, 16, 16);
-            const originMat = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-            scene.add(new THREE.Mesh(originGeo, originMat));
-
             // Trajectory Line
             trajectoryGeo = new THREE.BufferGeometry();
             const trajectoryMat = new THREE.LineBasicMaterial({ color: 0x00f5d4, linewidth: 2 });
             trajectoryLine = new THREE.Line(trajectoryGeo, trajectoryMat);
             scene.add(trajectoryLine);
 
-            // Create 3D AUV Mesh Group
+            // Create AUV 3D Model
             auvGroup = new THREE.Group();
 
-            // Main Cylindrical Body
-            const bodyGeo = new THREE.CylinderGeometry(0.18, 0.18, 1.2, 16);
-            bodyGeo.rotateZ(-Math.PI / 2);
-            const bodyMat = new THREE.MeshStandardMaterial({ color: 0xd90429, roughness: 0.3 });
-            auvGroup.add(new THREE.Mesh(bodyGeo, bodyMat));
+            const hullGeo = new THREE.CylinderGeometry(0.2, 0.2, 1.6, 16);
+            hullGeo.rotateZ(Math.PI / 2);
+            const hullMat = new THREE.MeshStandardMaterial({ color: 0xffb703, roughness: 0.3, metalness: 0.2 });
+            auvGroup.add(new THREE.Mesh(hullGeo, hullMat));
 
-            // Nose Cone (Front +X)
-            const noseGeo = new THREE.ConeGeometry(0.18, 0.4, 16);
+            const noseGeo = new THREE.SphereGeometry(0.2, 16, 16, 0, Math.PI * 2, 0, Math.PI / 2);
             noseGeo.rotateZ(-Math.PI / 2);
             noseGeo.translate(0.8, 0, 0);
-            const noseMat = new THREE.MeshStandardMaterial({ color: 0xef233c, roughness: 0.3 });
+            const noseMat = new THREE.MeshStandardMaterial({ color: 0x00a8e8 });
             auvGroup.add(new THREE.Mesh(noseGeo, noseMat));
 
-            // Rear Tail Section
-            const tailGeo = new THREE.ConeGeometry(0.18, 0.3, 16);
+            const tailGeo = new THREE.ConeGeometry(0.2, 0.4, 16);
             tailGeo.rotateZ(Math.PI / 2);
-            tailGeo.translate(-0.75, 0, 0);
-            const tailMat = new THREE.MeshStandardMaterial({ color: 0x1c3d5a, roughness: 0.5 });
-            auvGroup.add(new THREE.Mesh(tailGeo, tailMat));
+            tailGeo.translate(-1.0, 0, 0);
+            auvGroup.add(new THREE.Mesh(tailGeo, hullMat));
 
-            // Four Fins
-            const finMat = new THREE.MeshStandardMaterial({ color: 0xffb703, side: THREE.DoubleSide });
-
-            const elevLeftGeo = new THREE.PlaneGeometry(0.25, 0.3);
+            const finMat = new THREE.MeshStandardMaterial({ color: 0xd90429 });
+            
+            const elevLeftGeo = new THREE.PlaneGeometry(0.3, 0.25);
+            elevLeftGeo.rotateY(Math.PI / 2);
             elevLeftGeo.translate(-0.6, 0.25, 0);
             auvGroup.add(new THREE.Mesh(elevLeftGeo, finMat));
 
-            const elevRightGeo = new THREE.PlaneGeometry(0.25, 0.3);
+            const elevRightGeo = new THREE.PlaneGeometry(0.3, 0.25);
+            elevRightGeo.rotateY(Math.PI / 2);
             elevRightGeo.translate(-0.6, -0.25, 0);
             auvGroup.add(new THREE.Mesh(elevRightGeo, finMat));
 
@@ -825,56 +851,134 @@ HTML_CONTENT = """<!DOCTYPE html>
             document.getElementById('txt-gain').innerText = `${gainPct}%`;
             document.getElementById('bar-gain').style.width = `${gainPct}%`;
 
-            // 3. Mode Badges
-            const hhStatus = data.status.heading_hold;
-            const dhStatus = data.status.depth_hold;
+            // 3. Inspection Mission Telemetry & Status
+            const aut = data.autonomy || {};
+            const insp = aut.inspection_mission || {};
+            const phase = insp.status || (data.status ? data.status.mission : 'IDLE') || 'IDLE';
+            const dhStatus = data.status ? (data.status.depth_hold || 'OFF') : 'OFF';
+            const hhStatus = data.status ? (data.status.heading_hold || 'OFF') : 'OFF';
+
+            const statusBadge = document.getElementById('txt-mission-status');
+            statusBadge.innerText = phase;
+            if (phase === 'DESCENDING') {
+                statusBadge.style.color = '#00a8e8';
+                statusBadge.style.borderColor = '#00a8e8';
+            } else if (phase === 'INSPECTION') {
+                statusBadge.style.color = '#00f5d4';
+                statusBadge.style.borderColor = '#00f5d4';
+            } else if (phase === 'SURFACING') {
+                statusBadge.style.color = '#ffb703';
+                statusBadge.style.borderColor = '#ffb703';
+            } else if (phase === 'MISSION COMPLETE' || phase === 'SURFACE REACHED') {
+                statusBadge.style.color = '#52b788';
+                statusBadge.style.borderColor = '#52b788';
+            } else {
+                statusBadge.style.color = '#8d99ae';
+                statusBadge.style.borderColor = '#1c3d5a';
+            }
+
+            // Unified Telemetry Panel Updates
+            document.getElementById('ut-phase').innerText = phase;
+
+            const totalDurMin = parseFloat(document.getElementById('input-duration').value) || 30;
+            const elapsedSec = insp.elapsed_time || 0.0;
+
+            const mCurr = Math.floor(elapsedSec / 60);
+            const sCurr = Math.floor(elapsedSec % 60);
+            const mTot = Math.floor(totalDurMin);
+            const sTot = Math.floor((totalDurMin % 1) * 60);
+            const timeStr = `${mCurr < 10 ? '0' : ''}${mCurr}:${sCurr < 10 ? '0' : ''}${sCurr} / ${mTot < 10 ? '0' : ''}${mTot}:${sTot < 10 ? '0' : ''}${sTot}`;
+            
+            document.getElementById('ut-time').innerText = insp.time_str || timeStr;
+
+            // ACTIVE targets — use the actual controller targets from ROS, NOT mission input fields
+            const isDepthHoldActive = (dhStatus && dhStatus !== 'OFF') || phase === 'DESCENDING' || phase === 'INSPECTION' || phase === 'SURFACING';
+            let activeDepthTgt = 0.0;
+            if (dhStatus && dhStatus.startsWith('ON:')) {
+                const parts = dhStatus.split(':');
+                if (parts.length > 1) {
+                    activeDepthTgt = parseFloat(parts[1]);
+                } else {
+                    activeDepthTgt = aut.active_depth_target !== undefined ? aut.active_depth_target : (aut.target_depth || 0.0);
+                }
+            } else if (phase === 'DESCENDING' || phase === 'INSPECTION') {
+                activeDepthTgt = insp.target_depth !== undefined ? insp.target_depth : (aut.active_depth_target !== undefined ? aut.active_depth_target : (aut.target_depth || 20.0));
+            } else if (phase === 'SURFACING' || phase === 'MISSION COMPLETE') {
+                activeDepthTgt = 0.0;
+            } else {
+                activeDepthTgt = aut.active_depth_target !== undefined ? aut.active_depth_target : (aut.target_depth || 0.0);
+            }
+
+            const isHeadingHoldActive = (hhStatus && hhStatus !== 'OFF') || phase === 'DESCENDING' || phase === 'INSPECTION' || phase === 'SURFACING';
+            let activeHeadingTgt = 0.0;
+            if (hhStatus && hhStatus.startsWith('ON:')) {
+                const parts = hhStatus.split(':');
+                if (parts.length > 1) {
+                    activeHeadingTgt = parseFloat(parts[1]);
+                } else {
+                    activeHeadingTgt = aut.active_heading_target !== undefined ? aut.active_heading_target : (aut.target_heading || 0.0);
+                }
+            } else if (phase === 'DESCENDING' || phase === 'INSPECTION') {
+                activeHeadingTgt = insp.target_heading !== undefined ? insp.target_heading : (aut.active_heading_target !== undefined ? aut.active_heading_target : (aut.target_heading || 90.0));
+            } else if (phase === 'SURFACING' || phase === 'MISSION COMPLETE') {
+                activeHeadingTgt = insp.recovery_heading !== undefined ? insp.recovery_heading : 0.0;
+            } else {
+                activeHeadingTgt = aut.active_heading_target !== undefined ? aut.active_heading_target : (aut.target_heading || 0.0);
+            }
+
+            const reqSpd = insp.target_speed !== undefined ? insp.target_speed : (parseFloat(document.getElementById('input-speed').value) || 1.0);
+            const cmdSpd = insp.commanded_speed !== undefined ? insp.commanded_speed : ( (phase === 'DESCENDING' || phase === 'INSPECTION' || phase === 'SURFACING') ? reqSpd : 0.0 );
+            const actSpd = data.velocities ? data.velocities.vx : 0.0;
+
+            // Mode Badges
             const distStatus = data.status.distance_hold;
 
             const badgeMode = document.getElementById('badge-mode');
-            if (hhStatus !== 'OFF' || dhStatus !== 'OFF' || distStatus !== 'OFF' || data.status.mission !== 'IDLE') {
+            if (hhStatus !== 'OFF' || dhStatus !== 'OFF' || distStatus !== 'OFF' || phase !== 'IDLE') {
                 badgeMode.innerText = 'AUTONOMY';
             } else {
                 badgeMode.innerText = 'MANUAL';
             }
 
             const badgeDH = document.getElementById('badge-depth-hold');
-            if (dhStatus !== 'OFF') {
+            if (dhStatus !== 'OFF' || phase === 'DESCENDING' || phase === 'INSPECTION' || phase === 'SURFACING') {
                 badgeDH.className = 'badge-box badge-enabled';
-                badgeDH.innerText = `DEPTH HOLD: ${dhStatus}`;
+                badgeDH.innerText = `DEPTH HOLD: ON`;
             } else {
                 badgeDH.className = 'badge-box badge-disabled';
                 badgeDH.innerText = 'DEPTH HOLD: OFF';
             }
 
             const badgeHH = document.getElementById('badge-heading-hold');
-            if (hhStatus !== 'OFF') {
+            if (hhStatus !== 'OFF' || phase === 'DESCENDING' || phase === 'INSPECTION' || phase === 'SURFACING') {
                 badgeHH.className = 'badge-box badge-enabled';
-                badgeHH.innerText = `HEADING HOLD: ${hhStatus}`;
+                badgeHH.innerText = `HEADING HOLD: ON`;
             } else {
                 badgeHH.className = 'badge-box badge-disabled';
                 badgeHH.innerText = 'HEADING HOLD: OFF';
             }
 
-            document.getElementById('txt-mission-status').innerText = data.status.mission || 'IDLE';
-
             // 4. Telemetry Data
-            const roll = data.orientation.roll;
-            const pitch = data.orientation.pitch;
-            const yaw = data.orientation.yaw;
+            const orient = data.orientation || { roll: 0.0, pitch: 0.0, yaw: 0.0 };
+            const roll = orient.roll || 0.0;
+            const pitch = orient.pitch || 0.0;
+            const yaw = orient.yaw || 0.0;
 
             document.getElementById('val-roll').innerText = `${roll >= 0 ? '+' : ''}${roll.toFixed(1)}°`;
             document.getElementById('val-pitch').innerText = `${pitch >= 0 ? '+' : ''}${pitch.toFixed(1)}°`;
             document.getElementById('val-yaw').innerText = `${yaw >= 0 ? '+' : ''}${yaw.toFixed(1)}°`;
 
-            const vx = data.velocities.vx;
-            const vy = data.velocities.vy;
-            const vz = data.velocities.vz;
+            const vels = data.velocities || { vx: 0.0, vy: 0.0, vz: 0.0 };
+            const vx = vels.vx || 0.0;
+            const vy = vels.vy || 0.0;
+            const vz = vels.vz || 0.0;
 
             document.getElementById('val-vx').innerText = `${vx >= 0 ? '+' : ''}${vx.toFixed(2)} m/s`;
             document.getElementById('val-vy').innerText = `${vy >= 0 ? '+' : ''}${vy.toFixed(2)} m/s`;
             document.getElementById('val-vz').innerText = `${vz >= 0 ? '+' : ''}${vz.toFixed(2)} m/s`;
 
-            const depth = data.position.z;
+            const pos = data.position || { x: 0.0, y: 0.0, z: 0.5 };
+            const depth = pos.z !== undefined ? pos.z : 0.5;
             document.getElementById('val-depth').innerText = `${depth.toFixed(2)} m`;
             document.getElementById('val-lin-vel').innerText = `[${vx >= 0 ? '+' : ''}${vx.toFixed(1)}, ${vy >= 0 ? '+' : ''}${vy.toFixed(1)}, ${vz >= 0 ? '+' : ''}${vz.toFixed(1)}] m/s`;
 
@@ -886,56 +990,54 @@ HTML_CONTENT = """<!DOCTYPE html>
             document.getElementById('txt-packets').innerText = `${data.packets || 0} pkts`;
             document.getElementById('val-motion').innerText = data.world_motion || 'NONE';
 
-            // 5. Autonomy Closed-Loop PID HUD (Requirement 12)
-            const aut = data.autonomy || {};
-            const tgtDepth = aut.target_depth || 0.0;
+            // 5. Unified Telemetry Panel — Active Targets from Controllers
             const curDepth = depth;
-            const depthErr = tgtDepth - curDepth;
+            const depthErr = isDepthHoldActive ? (activeDepthTgt - curDepth) : 0.0;
             const depthCmd = aut.depth_cmd || 0.0;
 
-            const tgtHead = aut.target_heading || 0.0;
             const curHead = yaw;
-            let headErr = tgtHead - curHead;
+            let headErr = activeHeadingTgt - curHead;
             while (headErr > 180) headErr -= 360;
             while (headErr < -180) headErr += 360;
+            if (!isHeadingHoldActive) headErr = 0.0;
             const rudCmd = aut.rudder_cmd || 0.0;
 
-            const tgtDist = aut.target_distance || 0.0;
-            const distTrav = aut.current_distance !== undefined ? aut.current_distance : 0.0;
-            const distRem = aut.distance_remaining !== undefined ? aut.distance_remaining : Math.max(0.0, tgtDist - distTrav);
-            const thrCmd = aut.throttle_cmd || 0.0;
+            const acts = data.actuators || { main_thruster: 1500, elevator_left: 1500, rudder_left: 1500 };
+            const thrPWM = acts.main_thruster !== undefined ? acts.main_thruster : 1500;
+            const elevPWM = acts.elevator_left !== undefined ? acts.elevator_left : 1500;
+            const rudPWM = acts.rudder_left !== undefined ? acts.rudder_left : 1500;
 
-            const thrPWM = data.actuators.main_thruster;
-            const elevPWM = data.actuators.elevator_left;
-            const rudPWM = data.actuators.rudder_left;
+            // Depth section
+            document.getElementById('ut-depth-tgt').innerText = `${activeDepthTgt.toFixed(2)} m`;
+            document.getElementById('ut-depth-cur').innerText = `${curDepth.toFixed(2)} m`;
+            document.getElementById('ut-depth-err').innerText = `${depthErr >= 0 ? '+' : ''}${depthErr.toFixed(2)} m`;
+            document.getElementById('ut-depth-out').innerText = `${depthCmd >= 0 ? '+' : ''}${depthCmd.toFixed(1)}`;
 
-            document.getElementById('pid-depth-tgt').innerText = `${tgtDepth.toFixed(2)} m`;
-            document.getElementById('pid-depth-cur').innerText = `${curDepth.toFixed(2)} m`;
-            document.getElementById('pid-depth-err').innerText = `${depthErr >= 0 ? '+' : ''}${depthErr.toFixed(2)} m`;
-            document.getElementById('pid-depth-out').innerText = `${depthCmd >= 0 ? '+' : ''}${depthCmd.toFixed(1)}`;
+            // Heading section
+            document.getElementById('ut-head-tgt').innerText = `${activeHeadingTgt.toFixed(1)}\u00b0`;
+            document.getElementById('ut-head-cur').innerText = `${curHead.toFixed(1)}\u00b0`;
+            document.getElementById('ut-head-err').innerText = `${headErr >= 0 ? '+' : ''}${headErr.toFixed(1)}\u00b0`;
+            document.getElementById('ut-head-out').innerText = `${rudCmd >= 0 ? '+' : ''}${rudCmd.toFixed(1)}`;
 
-            document.getElementById('pid-head-tgt').innerText = `${tgtHead.toFixed(1)}°`;
-            document.getElementById('pid-head-cur').innerText = `${curHead.toFixed(1)}°`;
-            document.getElementById('pid-head-err').innerText = `${headErr >= 0 ? '+' : ''}${headErr.toFixed(1)}°`;
-            document.getElementById('pid-head-out').innerText = `${rudCmd >= 0 ? '+' : ''}${rudCmd.toFixed(1)}`;
+            // Speed section
+            document.getElementById('ut-spd-tgt').innerText = `${reqSpd.toFixed(2)} m/s`;
+            document.getElementById('ut-spd-cmd').innerText = `${cmdSpd.toFixed(2)} m/s`;
+            document.getElementById('ut-spd-act').innerText = `${actSpd.toFixed(2)} m/s`;
 
-            document.getElementById('pid-dist-tgt').innerText = `${tgtDist.toFixed(1)} m`;
-            document.getElementById('pid-dist-trav').innerText = `${distTrav.toFixed(1)} m`;
-            document.getElementById('pid-dist-rem').innerText = `${distRem.toFixed(1)} m`;
-            document.getElementById('pid-dist-out').innerText = `${thrCmd.toFixed(2)}`;
+            // Actuator section
+            document.getElementById('ut-act-thr').innerText = `${thrPWM} us`;
+            document.getElementById('ut-act-elev').innerText = `${elevPWM} us`;
+            document.getElementById('ut-act-rud').innerText = `${rudPWM} us`;
 
-            document.getElementById('act-thr-cmd').innerText = `${thrPWM} us`;
-            document.getElementById('act-elev-cmd').innerText = `${elevPWM} us`;
-            document.getElementById('act-rud-cmd').innerText = `${rudPWM} us`;
+            // Physical state section
+            document.getElementById('ut-phys-fwd').innerText = `${vx.toFixed(2)} m/s`;
+            document.getElementById('ut-phys-vz').innerText = `${vz.toFixed(2)} m/s`;
+            document.getElementById('ut-phys-pitch').innerText = `${pitch >= 0 ? '+' : ''}${pitch.toFixed(1)}\u00b0`;
+            document.getElementById('ut-phys-yaw').innerText = `${yaw >= 0 ? '+' : ''}${yaw.toFixed(1)}\u00b0`;
+            document.getElementById('ut-phys-roll').innerText = `${roll >= 0 ? '+' : ''}${roll.toFixed(1)}\u00b0`;
+            document.getElementById('ut-phys-depth').innerText = `${curDepth.toFixed(2)} m`;
 
-            document.getElementById('phys-fwd-speed').innerText = `${vx.toFixed(2)} m/s`;
-            document.getElementById('phys-vert-speed').innerText = `${vz.toFixed(2)} m/s`;
-            document.getElementById('phys-pitch').innerText = `${pitch >= 0 ? '+' : ''}${pitch.toFixed(1)}°`;
-            document.getElementById('phys-yaw').innerText = `${yaw >= 0 ? '+' : ''}${yaw.toFixed(1)}°`;
-            document.getElementById('phys-roll').innerText = `${roll >= 0 ? '+' : ''}${roll.toFixed(1)}°`;
-            document.getElementById('phys-depth').innerText = `${curDepth.toFixed(2)} m`;
-
-            // 6. Physics Debug Data Panel (Requirement 13)
+            // 6. Physics Debug Data Panel
             const phys = data.physics || {};
             const buoyF = phys.buoyancy_force !== undefined ? phys.buoyancy_force : 12.3;
             const thrF = phys.thrust_force || 0.0;
@@ -953,12 +1055,6 @@ HTML_CONTENT = """<!DOCTYPE html>
             document.getElementById('phys-nyaw').innerText = `${nYaw.toFixed(2)} Nm`;
             document.getElementById('phys-lroll').innerText = `${lRoll.toFixed(2)} Nm`;
 
-            // Pitch/Roll Crosshair Widget Dot
-            const dot = document.getElementById('crosshair-dot');
-            const offsetX = Math.max(-25, Math.min(25, roll * 1.2));
-            const offsetY = Math.max(-25, Math.min(25, pitch * 1.2));
-            dot.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
-
             // Actuator PWM Bars
             const thrPct = Math.round(((thrPWM - 1500) / 400) * 100);
             const elevPct = Math.round(((elevPWM - 1500) / 400) * 100);
@@ -973,10 +1069,10 @@ HTML_CONTENT = """<!DOCTYPE html>
             document.getElementById('val-rud-pwm').innerText = `${rudPWM} us (${rudPct >= 0 ? '+' : ''}${rudPct}%)`;
             document.getElementById('fill-rud-pwm').style.width = `${((rudPWM - 1100) / 800) * 100}%`;
 
-            // 7. Update 3D AUV Pose in Three.js (Aligned 3D pitch rotation sign)
-            const posX = data.position.x;
-            const posY = data.position.y;
-            const posZ = data.position.z;
+            // 7. Update 3D AUV Pose in Three.js
+            const posX = pos.x !== undefined ? pos.x : 0.0;
+            const posY = pos.y !== undefined ? pos.y : 0.0;
+            const posZ = pos.z !== undefined ? pos.z : 0.5;
 
             const tX = posX;
             const tY = -posZ;
@@ -996,11 +1092,6 @@ HTML_CONTENT = """<!DOCTYPE html>
                 trajectoryPoints.shift();
             }
             trajectoryGeo.setFromPoints(trajectoryPoints);
-
-            if (cameraMode === 'follow') {
-                controls.target.set(tX, tY, tZ);
-                controls.update();
-            }
         }
 
         function animate() {
@@ -1021,7 +1112,7 @@ HTML_CONTENT = """<!DOCTYPE html>
             };
         }
 
-        // Real-Time WebSockets Joystick Streaming (Windows Gamepad -> ROS /joy)
+        // Real-Time WebSockets Joystick Streaming
         let joyWS = null;
         function initJoyWS() {
             try {
@@ -1033,6 +1124,32 @@ HTML_CONTENT = """<!DOCTYPE html>
         }
 
         let lastJoyTime = 0;
+        const keysDown = {};
+
+        window.addEventListener('keydown', (e) => {
+            if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+            keysDown[e.code] = true;
+            if (e.code === 'Space') {
+                e.preventDefault();
+                toggleArm();
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+            keysDown[e.code] = false;
+        });
+
+        function toggleArm() {
+            const isCurrentlyArmed = latestState && latestState.status && latestState.status.armed;
+            const nextArmed = !isCurrentlyArmed;
+            fetch('/api/arm', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ armed: nextArmed })
+            }).catch(err => console.error('Arming toggle error:', err));
+        }
+
         function pollGamepad() {
             const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
             let activeGp = null;
@@ -1044,49 +1161,81 @@ HTML_CONTENT = """<!DOCTYPE html>
             }
 
             const joyBadge = document.getElementById('badge-joy');
+            let axes = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
+            let buttons = [0, 0, 0, 0, 0, 0, 0, 0];
+            let hasInput = false;
+
             if (activeGp) {
                 joyBadge.innerText = 'JOYSTICK: CONNECTED';
                 joyBadge.className = 'badge-box badge-enabled';
-
-                const now = performance.now();
-                if (now - lastJoyTime >= 25) { // ~40 Hz streaming
-                    lastJoyTime = now;
-                    const axes = Array.from(activeGp.axes).map((v, idx) => {
-                        let val = Math.abs(v) < 0.05 ? 0.0 : v;
-                        // Invert Y axes (axis 1, axis 3, axis 5) to match ROS sensor_msgs/Joy (+1.0 UP, -1.0 DOWN)
-                        if (idx === 1 || idx === 3 || idx === 5) {
-                            val = -val;
-                        }
-                        return val;
-                    });
-                    const buttons = Array.from(activeGp.buttons).map(b => b.pressed ? 1 : 0);
-                    const payload = JSON.stringify({ axes: axes, buttons: buttons });
-
-                    if (joyWS && joyWS.readyState === WebSocket.OPEN) {
-                        joyWS.send(payload);
-                    } else {
-                        fetch('/api/joy', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: payload
-                        }).catch(() => {});
+                axes = Array.from(activeGp.axes).map((v, idx) => {
+                    let val = Math.abs(v) < 0.05 ? 0.0 : v;
+                    if (idx === 1 || idx === 3 || idx === 5) {
+                        val = -val;
                     }
-                }
+                    return val;
+                });
+                buttons = Array.from(activeGp.buttons).map(b => b.pressed ? 1 : 0);
+                hasInput = true;
             } else {
-                joyBadge.innerText = 'JOYSTICK: DISCONNECTED';
-                joyBadge.className = 'badge-box badge-disabled';
+                // Keyboard Teleop Fallback:
+                // W/S = Thruster (+1 / -1 on axis 3)
+                // A/D = Rudder (-1 / +1 on axis 0)
+                // Up/Down = Elevator (+1 / -1 on axis 1)
+                // X = Depth hold (button 2)
+                // R/H = Heading hold (button 5)
+                // Y/T = Gain up/down (buttons 3 / 0)
+                if (keysDown['KeyW']) { axes[3] = 1.0; hasInput = true; }
+                if (keysDown['KeyS']) { axes[3] = -1.0; hasInput = true; }
+                if (keysDown['KeyA']) { axes[0] = -1.0; hasInput = true; }
+                if (keysDown['KeyD']) { axes[0] = 1.0; hasInput = true; }
+                if (keysDown['ArrowUp']) { axes[1] = 1.0; hasInput = true; }
+                if (keysDown['ArrowDown']) { axes[1] = -1.0; hasInput = true; }
+
+                if (keysDown['KeyX']) { buttons[2] = 1; hasInput = true; }
+                if (keysDown['KeyB']) { buttons[1] = 1; hasInput = true; }
+                if (keysDown['KeyR'] || keysDown['KeyH']) { buttons[5] = 1; hasInput = true; }
+                if (keysDown['KeyL']) { buttons[4] = 1; hasInput = true; }
+                if (keysDown['KeyY']) { buttons[3] = 1; hasInput = true; }
+                if (keysDown['KeyT']) { buttons[0] = 1; hasInput = true; }
+
+                const isUsingKeyboard = Object.values(keysDown).some(v => v === true);
+                if (isUsingKeyboard) {
+                    joyBadge.innerText = 'KEYBOARD TELEOP';
+                    joyBadge.className = 'badge-box badge-enabled';
+                } else {
+                    joyBadge.innerText = 'JOYSTICK: DISCONNECTED';
+                    joyBadge.className = 'badge-box badge-disabled';
+                }
+            }
+
+            const now = performance.now();
+            if ((activeGp || hasInput) && (now - lastJoyTime >= 25)) { // ~40 Hz streaming
+                lastJoyTime = now;
+                const payload = JSON.stringify({ axes: axes, buttons: buttons });
+
+                if (joyWS && joyWS.readyState === WebSocket.OPEN) {
+                    joyWS.send(payload);
+                } else {
+                    fetch('/api/joy', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: payload
+                    }).catch(() => {});
+                }
             }
         }
 
         function startMission() {
-            const depth = parseFloat(document.getElementById('input-depth').value) || 0.0;
-            const heading = parseFloat(document.getElementById('input-heading').value) || 0.0;
-            const distance = parseFloat(document.getElementById('input-distance').value) || 0.0;
+            const depth = parseFloat(document.getElementById('input-depth').value) || 20.0;
+            const speed = parseFloat(document.getElementById('input-speed').value) || 1.0;
+            const heading = parseFloat(document.getElementById('input-heading').value) || 90.0;
+            const duration = parseFloat(document.getElementById('input-duration').value) || 30.0;
 
             fetch('/api/mission/start', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ depth: depth, heading: heading, distance: distance })
+                body: JSON.stringify({ depth: depth, speed: speed, heading: heading, duration: duration })
             }).catch(err => console.error('Mission start error:', err));
         }
 
@@ -1095,16 +1244,11 @@ HTML_CONTENT = """<!DOCTYPE html>
             .catch(err => console.error('Mission stop error:', err));
         }
 
-        function resetSim() {
-            fetch('/api/mission/reset', { method: 'POST' })
-            .catch(err => console.error('Mission reset error:', err));
-        }
-
         window.onload = () => {
             init3D();
             startSSE();
             initJoyWS();
-            setInterval(pollGamepad, 25); // 40 Hz Gamepad Polling & ROS /joy streaming
+            setInterval(pollGamepad, 25);
         };
     </script>
 </body>
@@ -1239,15 +1383,29 @@ class WebHTTPRequestHandler(BaseHTTPRequestHandler):
 
         elif self.path == '/api/mission/start':
             if ros_node_instance is not None:
-                depth = float(data.get('depth', 2.0))
+                depth = float(data.get('depth', 20.0))
+                speed = float(data.get('speed', 1.0))
                 heading = float(data.get('heading', 90.0))
-                distance = float(data.get('distance', 5.0))
-                ros_node_instance.start_mission(depth, heading, distance)
+                duration = float(data.get('duration', 30.0))
+                ros_node_instance.start_mission(depth, heading, 0.0, speed, duration)
             self.send_response(200)
+
             self.send_header('Content-Type', 'application/json')
             self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
             self.wfile.write(b'{"status":"started"}')
+
+        elif self.path == '/api/arm':
+            if ros_node_instance is not None:
+                armed_val = bool(data.get('armed', True))
+                arm_msg = Bool()
+                arm_msg.data = armed_val
+                ros_node_instance.arm_pub.publish(arm_msg)
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(b'{"status":"ok"}')
 
         elif self.path == '/api/mission/stop':
             if ros_node_instance is not None:
@@ -1257,15 +1415,6 @@ class WebHTTPRequestHandler(BaseHTTPRequestHandler):
             self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
             self.wfile.write(b'{"status":"stopped"}')
-
-        elif self.path == '/api/mission/reset':
-            if ros_node_instance is not None:
-                ros_node_instance.reset_simulation()
-            self.send_response(200)
-            self.send_header('Content-Type', 'application/json')
-            self.send_header('Access-Control-Allow-Origin', '*')
-            self.end_headers()
-            self.wfile.write(b'{"status":"reset"}')
         else:
             self.send_error(404, "Endpoint Not Found")
 
@@ -1320,6 +1469,13 @@ class WebVisualizerNode(Node):
         self.create_subscription(String, '/auv/distance_telemetry', self.dist_telem_cb, 10)
         self.create_subscription(Float32, '/auv/distance_remaining', self.dist_rem_cb, 10)
         self.create_subscription(Float32, '/auv/distance_travelled', self.dist_trav_cb, 10)
+        self.create_subscription(String, '/auv/inspection_mission_telemetry', self.inspection_telem_cb, 10)
+
+        # Active controller target subscriptions for unified HUD
+        self.create_subscription(Float32, '/auv/active_depth_target', self.active_depth_target_cb, 10)
+        self.create_subscription(Float32, '/auv/active_heading_target', self.active_heading_target_cb, 10)
+        self.create_subscription(String, '/auv/depth_telemetry', self.depth_telem_cb, 10)
+        self.create_subscription(String, '/auv/heading_telemetry', self.heading_telem_cb, 10)
 
     def publish_joy(self, axes, buttons):
         msg = Joy()
@@ -1327,7 +1483,14 @@ class WebVisualizerNode(Node):
         msg.buttons = [int(b) for b in buttons]
         self.joy_pub.publish(msg)
 
-    def start_mission(self, depth, heading, distance):
+    def inspection_telem_cb(self, msg: String):
+        try:
+            data = json.loads(msg.data)
+            simulation_state["autonomy"]["inspection_mission"] = data
+        except Exception:
+            pass
+
+    def start_mission(self, depth, heading, distance, speed=1.0, duration=30.0):
         arm_msg = Bool()
         arm_msg.data = True
         self.arm_pub.publish(arm_msg)
@@ -1336,18 +1499,24 @@ class WebVisualizerNode(Node):
         msg.depth = float(depth)
         msg.heading = float(heading)
         msg.distance = float(distance)
+        msg.inspection_speed = float(speed)
+        msg.duration = float(duration)
+        msg.start = True
+        msg.cancel = False
         self.mission_pub.publish(msg)
-        self.get_logger().info(f"ARMED & MISSION STARTED from Web UI: Depth={depth}m, Heading={heading}deg, Distance={distance}m")
+        self.get_logger().info(f"ARMED & MISSION STARTED from Web UI: Depth={depth}m, Heading={heading}deg, Speed={speed}m/s, Duration={duration}min")
 
     def stop_mission(self):
+        msg = Mission()
+        msg.cancel = True
+        msg.start = False
+        self.mission_pub.publish(msg)
+
         dist_msg = Float32()
         dist_msg.data = 0.0
         self.desired_distance_pub.publish(dist_msg)
 
-        status_msg = String()
-        status_msg.data = "ABORTED"
-        self.mission_status_pub.publish(status_msg)
-        self.get_logger().info("MISSION STOPPED from Web UI: Thruster neutral, Mission ABORTED.")
+        self.get_logger().info("MISSION STOP COMMAND SENT from Web UI.")
 
     def reset_simulation(self):
         if self.reset_client.service_is_ready():
@@ -1403,12 +1572,44 @@ class WebVisualizerNode(Node):
 
     def target_depth_cb(self, msg: Float32):
         simulation_state["autonomy"]["target_depth"] = float(msg.data)
+        simulation_state["autonomy"]["active_depth_target"] = float(msg.data)
 
     def target_heading_cb(self, msg: Float32):
         simulation_state["autonomy"]["target_heading"] = float(msg.data)
+        simulation_state["autonomy"]["active_heading_target"] = float(msg.data)
 
     def target_distance_cb(self, msg: Float32):
         simulation_state["autonomy"]["target_distance"] = float(msg.data)
+
+    def active_depth_target_cb(self, msg: Float32):
+        simulation_state["autonomy"]["active_depth_target"] = float(msg.data)
+        simulation_state["autonomy"]["target_depth"] = float(msg.data)
+
+    def active_heading_target_cb(self, msg: Float32):
+        simulation_state["autonomy"]["active_heading_target"] = float(msg.data)
+        simulation_state["autonomy"]["target_heading"] = float(msg.data)
+
+    def depth_telem_cb(self, msg: String):
+        try:
+            data = json.loads(msg.data)
+            tgt = float(data.get("target", 0.0))
+            simulation_state["autonomy"]["active_depth_target"] = tgt
+            simulation_state["autonomy"]["target_depth"] = tgt
+            simulation_state["autonomy"]["depth_cmd"] = float(data.get("output", 0.0))
+            simulation_state["autonomy"]["depth_error"] = float(data.get("error", 0.0))
+        except Exception:
+            pass
+
+    def heading_telem_cb(self, msg: String):
+        try:
+            data = json.loads(msg.data)
+            tgt = float(data.get("target", 0.0))
+            simulation_state["autonomy"]["active_heading_target"] = tgt
+            simulation_state["autonomy"]["target_heading"] = tgt
+            simulation_state["autonomy"]["rudder_cmd"] = float(data.get("output", 0.0))
+            simulation_state["autonomy"]["heading_error"] = float(data.get("error", 0.0))
+        except Exception:
+            pass
 
     def ideal_state_cb(self, msg: Odometry):
         self.packet_counter += 1
@@ -1492,9 +1693,23 @@ class WebVisualizerNode(Node):
 
     def hh_cb(self, msg: String):
         simulation_state["status"]["heading_hold"] = msg.data
+        if msg.data.startswith("ON:"):
+            try:
+                tgt = float(msg.data.split(":")[1])
+                simulation_state["autonomy"]["active_heading_target"] = tgt
+                simulation_state["autonomy"]["target_heading"] = tgt
+            except Exception:
+                pass
 
     def dh_cb(self, msg: String):
         simulation_state["status"]["depth_hold"] = msg.data
+        if msg.data.startswith("ON:"):
+            try:
+                tgt = float(msg.data.split(":")[1])
+                simulation_state["autonomy"]["active_depth_target"] = tgt
+                simulation_state["autonomy"]["target_depth"] = tgt
+            except Exception:
+                pass
 
     def dist_cb(self, msg: String):
         simulation_state["status"]["distance_hold"] = msg.data

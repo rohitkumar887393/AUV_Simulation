@@ -63,8 +63,11 @@ class MissionManager(Node):
             f'MISSION RECEIVED | '
             f'Heading={msg.heading:.1f} '
             f'Depth={msg.depth:.1f} '
-            f'Distance={msg.distance:.1f}'
+            f'Distance={msg.distance:.1f} '
+            f'Speed={msg.inspection_speed:.2f} '
+            f'Duration={msg.duration:.1f}'
         )
+
 
 
 def main(args=None):

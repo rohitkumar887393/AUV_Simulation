@@ -204,6 +204,14 @@ class AUVMonitor(Node):
             10
         )
 
+        self.inspection_telem = {}
+        self.create_subscription(
+            String,
+            '/auv/inspection_mission_telemetry',
+            self.inspection_telem_callback,
+            10
+        )
+
 
 
 
@@ -315,18 +323,20 @@ class AUVMonitor(Node):
 
 
     def mission_status_callback(self, msg):
-
         self.mission_status = msg.data
 
+    def inspection_telem_callback(self, msg):
+        try:
+            import json
+            self.inspection_telem = json.loads(msg.data)
+        except Exception:
+            pass
 
     def display(self):
-
         os.system('clear')
 
         print("=" * 50)
-
         print("AUV STATUS")
-
         print("=" * 50)
 
         print(
@@ -353,24 +363,18 @@ class AUVMonitor(Node):
 
         print()
 
-
         print(
               f"THRUSTER GAIN : {self.gain*100:.0f}%"
         )
 
         if self.depth_hold:
-
             print(
                 f"DEPTH HOLD    : ON @ {self.target_depth:.2f} m"
             )
-
         else:
-
             print("DEPTH HOLD    : OFF")
 
         print()
-
-
 
         if self.leak:
             print("LEAK STATUS : DETECTED")
@@ -378,8 +382,6 @@ class AUVMonitor(Node):
             print("LEAK STATUS : SAFE")
 
         print("=" * 50)
-
-        
         print()
 
         print("DVL")
@@ -408,70 +410,41 @@ class AUVMonitor(Node):
         print()
 
         print("=" * 50)
-
-        print("AUTONOMY")
-
+        print("INSPECTION MISSION HUD")
         print("=" * 50)
 
-        print()
+        if self.inspection_telem:
+            status = self.inspection_telem.get("status", "IDLE")
+            t_depth = self.target_depth if (status == "IDLE" or self.depth_hold) else self.inspection_telem.get("target_depth", 0.0)
+            c_depth = self.inspection_telem.get("current_depth", self.depth)
+            req_spd = self.inspection_telem.get("requested_speed", 0.0)
+            min_spd = self.inspection_telem.get("minimum_speed", 0.0)
+            cmd_spd = self.inspection_telem.get("commanded_speed", 0.0)
+            t_hdg = self.target_heading if (status == "IDLE" or self.heading_hold_enabled) else self.inspection_telem.get("target_heading", 0.0)
+            time_str = self.inspection_telem.get("time_str", "00:00 / 00:00")
+            d_pid = "ON" if self.depth_hold else ("ON" if self.inspection_telem.get("depth_pid_active", False) else "OFF")
 
-        print(
-            f"HEADING HOLD  : {'ON' if self.heading_hold_enabled else 'OFF'}"
-        )
+            print(f"Status: {status}")
+            print(f"Target Depth:  {t_depth:.2f} m")
+            print(f"Current Depth: {c_depth:.2f} m")
+            print(f"Requested Speed: {req_spd:.2f} m/s")
+            print(f"Minimum Speed:   {min_spd:.2f} m/s")
+            print(f"Commanded Speed: {cmd_spd:.2f} m/s")
+            print(f"Target Heading:  {t_hdg:.1f}°")
+            print(f"Mission Time:    {time_str}")
 
-        print(
-            f"DEPTH HOLD    : {'ON' if self.depth_hold else 'OFF'}"
-        )
-
-        print(
-            f"DISTANCE HOLD : {'ON' if self.distance_hold_enabled else 'OFF'}"
-        )
-
-        print()
-
-        print("CURRENT")
-
-        print(
-            f"HEADING  : {self.yaw:.2f} deg\n"
-            f"DEPTH    : {self.depth:.2f} m"
-        )
-
-        print()
-
-        print("TARGET")
-
-        print(
-            f"HEADING  : {self.target_heading:.2f} deg\n"
-            f"DEPTH    : {self.target_depth:.2f} m\n"
-            f"DISTANCE : {self.target_distance:.2f} m"
-        )
-
-        print()
-
-        print("COMMANDS")
-
-        print(
-            f"RUDDER   : {self.rudder_cmd:.1f}\n"
-            f"ELEVATOR : {self.depth_cmd:.1f}\n"
-            f"THROTTLE : {self.throttle_cmd:.2f}"
-        )
-
-        print()
-
-        if self.distance_hold_enabled:
-
-            print("MISSION STATUS : RUNNING")
-
+            if status == "SURFACING":
+                print(f"Phase: SURFACING | Target Depth: 0 m | Depth PID: {d_pid}")
+            elif status in ("SURFACE REACHED", "MISSION COMPLETE"):
+                print("Phase: MISSION COMPLETE")
         else:
+            print(f"Status: {self.mission_status}")
+            print(f"Target Depth:  {self.target_depth:.2f} m")
+            print(f"Current Depth: {self.depth:.2f} m")
 
-            print("MISSION STATUS : IDLE")
-
+        print("=" * 50)
         print()
 
-        print(f"MISSION STATUS : {self.mission_status}")
-
-
-        print()
 
 def main(args=None):
 

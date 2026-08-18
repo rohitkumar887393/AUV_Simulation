@@ -42,6 +42,7 @@ class HeadingHold(Node):
         self.heading_error = 0.0
 
         self.heading_hold_enabled = False
+        self.target_source = 'NONE'
 
         self.prev_lb = 0
         self.prev_rb = 0
@@ -87,9 +88,23 @@ class HeadingHold(Node):
             10
         )
 
+        # Common desired heading publisher — notifies all nodes of target updates
+        self.target_pub = self.create_publisher(
+            Float32,
+            '/auv/desired_heading',
+            10
+        )
+
         self.telemetry_pub = self.create_publisher(
             String,
             '/auv/heading_telemetry',
+            10
+        )
+
+        # Active target publisher — always reflects the real controller target
+        self.active_target_pub = self.create_publisher(
+            Float32,
+            '/auv/active_heading_target',
             10
         )
 
@@ -97,14 +112,14 @@ class HeadingHold(Node):
             'Heading Hold Started (Continuous Closed-Loop Control Active)'
         )
 
-        self.target_pub = self.create_publisher(
-            Float32,
-            '/auv/desired_heading',
-            10
-        )
-
     def desired_heading_callback(self, msg):
-        self.target_heading = float(msg.data)
+        """Accept external/mission heading target."""
+        new_target = float(msg.data)
+        if abs(self.target_heading - new_target) < 1e-4 and self.heading_hold_enabled:
+            return
+
+        self.target_heading = new_target
+        self.target_source = 'EXTERNAL'
         self.heading_hold_enabled = True
 
         self.pid.integral = 0.0
@@ -119,26 +134,26 @@ class HeadingHold(Node):
         status.data = f"ON:{self.target_heading:.1f}"
         self.status_pub.publish(status)
 
-        self.get_logger().info(f"DESIRED HEADING SET : {self.target_heading:.1f}°")
+        active = Float32()
+        active.data = self.target_heading
+        self.active_target_pub.publish(active)
+
+        self.get_logger().info(f"DESIRED HEADING SET (EXTERNAL): {self.target_heading:.1f}°")
 
     def joy_callback(self, msg):
 
-        lb_btn = msg.buttons[4]   # LB
-        rb_btn = msg.buttons[5]   # RB
+        lb_btn = msg.buttons[4] if len(msg.buttons) > 4 else 0   # LB
+        rb_btn = msg.buttons[5] if len(msg.buttons) > 5 else 0   # RB
 
-        # RB -> Enable Heading Hold
+        # RB -> Enable Heading Hold at CURRENT actual heading
         if rb_btn == 1 and self.prev_rb == 0:
-            self.target_heading = self.current_heading
-
-            target = Float32()
-            target.data = self.target_heading
-            self.target_pub.publish(target)
+            self.target_heading = float(self.current_heading)
+            self.target_source = 'JOYSTICK'
+            self.heading_hold_enabled = True
 
             self.pid.integral = 0.0
             self.pid.prev_error = 0.0
             self.prev_time = self.get_clock().now()
-
-            self.heading_hold_enabled = True
 
             state = Float32()
             state.data = 1.0
@@ -148,13 +163,34 @@ class HeadingHold(Node):
             status.data = f"ON:{self.target_heading:.1f}"
             self.status_pub.publish(status)
 
+            # Publish to common /auv/desired_heading
+            target_msg = Float32()
+            target_msg.data = self.target_heading
+            self.target_pub.publish(target_msg)
+
+            # Publish active target
+            self.active_target_pub.publish(target_msg)
+
+            # Immediate telemetry
+            telem_dict = {
+                "target": self.target_heading,
+                "current": self.current_heading,
+                "error": 0.0,
+                "output": 0.0,
+                "source": "JOYSTICK"
+            }
+            telem_msg = String()
+            telem_msg.data = json.dumps(telem_dict)
+            self.telemetry_pub.publish(telem_msg)
+
             self.get_logger().info(
-                f"HEADING HOLD ON : {self.target_heading:.1f}°"
+                f"HEADING HOLD ON (JOYSTICK CAPTURED): target_heading = {self.target_heading:.1f}° (current_heading = {self.current_heading:.1f}°)"
             )
 
         # LB -> Disable Heading Hold
         if lb_btn == 1 and self.prev_lb == 0:
             self.heading_hold_enabled = False
+            self.target_source = 'NONE'
 
             state = Float32()
             state.data = 0.0
@@ -168,9 +204,7 @@ class HeadingHold(Node):
             cmd.data = 0.0
             self.rudder_pub.publish(cmd)
 
-            self.get_logger().info(
-                "HEADING HOLD OFF"
-            )
+            self.get_logger().info("HEADING HOLD OFF")
 
         self.prev_lb = lb_btn
         self.prev_rb = rb_btn
@@ -211,18 +245,24 @@ class HeadingHold(Node):
 
         self.prev_time = now
 
-        # Publish Heading Debug Telemetry (Requirement 12)
+        # Publish active target for HUD
+        active = Float32()
+        active.data = self.target_heading
+        self.active_target_pub.publish(active)
+
+        # Publish Heading Debug Telemetry
         telem_dict = {
             "target": self.target_heading,
             "current": self.current_heading,
             "error": error,
-            "output": cmd.data
+            "output": float(output),
+            "source": self.target_source
         }
         telem_msg = String()
         telem_msg.data = json.dumps(telem_dict)
         self.telemetry_pub.publish(telem_msg)
 
-        # Logging (Requirement 3)
+        # Logging
         self.get_logger().info(
             f"HDG: Target={self.target_heading:.1f}° "
             f"Current={self.current_heading:.1f}° "

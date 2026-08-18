@@ -104,13 +104,6 @@ class RollStabilizer(Node):
         # Add parameter event callback for live tuning
         self.add_on_set_parameters_callback(self.parameter_callback)
 
-        self.debug_counter += 1
-
-        if self.debug_counter % 20 == 0:
-            self.get_logger().info(
-                f'Roll={self.roll:.2f} deg | Cmd={roll_cmd:.1f}'
-            )
-
 
     def parameter_callback(self, params):
         for param in params:

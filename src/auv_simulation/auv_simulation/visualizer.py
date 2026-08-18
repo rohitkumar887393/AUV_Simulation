@@ -91,6 +91,9 @@ class SimulationVisualizer(Node):
         self.create_subscription(String, '/auv/distance_hold_status', self.dist_stat_cb, 10)
         self.create_subscription(String, '/auv/mission_status', self.miss_stat_cb, 10)
         self.create_subscription(String, '/auv/heading_telemetry', self.heading_telem_cb, 10)
+        self.inspection_telem = {}
+        self.create_subscription(String, '/auv/inspection_mission_telemetry', self.inspection_telem_cb, 10)
+
 
         # Setup GUI Plot if enabled
         if self.enable_gui:
@@ -182,7 +185,25 @@ class SimulationVisualizer(Node):
         except Exception:
             pass
 
+    def inspection_telem_cb(self, msg):
+        try:
+            self.inspection_telem = json.loads(msg.data)
+        except Exception:
+            pass
+
     def update_console(self):
+        insp_str = ""
+        if self.inspection_telem:
+            st = self.inspection_telem.get("status", "IDLE")
+            req_s = self.inspection_telem.get("requested_speed", 0.0)
+            min_s = self.inspection_telem.get("minimum_speed", 0.0)
+            cmd_s = self.inspection_telem.get("commanded_speed", 0.0)
+            t_str = self.inspection_telem.get("time_str", "00:00/00:00")
+            insp_str = (
+                f" Mission State: {st:<20} | Time: {t_str}\n"
+                f" Speed Targets : Req: {req_s:.2f} m/s | Min: {min_s:.2f} m/s | Cmd: {cmd_s:.2f} m/s\n"
+            )
+
         dashboard = (
             f"\n======================================================================\n"
             f"                     AUV LIVE TELEMETRY DASHBOARD                     \n"
@@ -192,6 +213,7 @@ class SimulationVisualizer(Node):
             f" Velocity   : Forward Vx: {self.vx:5.2f} m/s | Heave Vz: {self.vz:5.2f} m/s\n"
             f" Heading Signal Chain: Target: {self.target_heading:5.1f}° | Current: {self.yaw:5.1f}° | Error: {self.heading_error:5.1f}° | PID Out: {self.heading_pid_output:6.1f} | Rudder PWM: {self.cmd_rud_l:4d} us\n"
             f" Targets    : Desired Heading: {self.target_heading:5.1f}° | Desired Depth: {self.target_depth:5.2f} m | Desired Dist: {self.target_distance:5.2f} m\n"
+            f"{insp_str}"
             f" Controllers: Heading Hold: {self.heading_hold_status:<10} | Depth Hold: {self.depth_hold_status:<10} | Distance Hold: {self.distance_hold_status:<10} | Mission: {self.mission_status:<10}\n"
             f" Actuators (PWM us) [Cmd vs Actual]:\n"
             f"   Elevator L : Cmd: {self.cmd_el_l:4d} us | Actual: {self.act_el_l:4d} us\n"
@@ -202,6 +224,7 @@ class SimulationVisualizer(Node):
             f"======================================================================\n"
         )
         self.get_logger().info(dashboard)
+
 
     def update_gui(self):
         if not self.enable_gui or len(self.history_time) == 0:

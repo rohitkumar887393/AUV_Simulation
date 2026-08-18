@@ -108,6 +108,13 @@ def generate_launch_description():
         output='screen'
     )
 
+    inspection_mission_node = Node(
+        package='auv_autonomy',
+        executable='inspection_mission',
+        name='inspection_mission',
+        output='screen'
+    )
+
     return LaunchDescription([
         use_sim_arg,
         enable_gui_arg,
@@ -121,5 +128,7 @@ def generate_launch_description():
         heading_hold_node,
         depth_hold_node,
         distance_hold_node,
-        mission_manager_node
+        mission_manager_node,
+        inspection_mission_node
     ])
+

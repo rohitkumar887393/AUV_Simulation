@@ -39,6 +39,13 @@ def generate_launch_description():
             executable='mission_manager',
             name='mission_manager',
             output='screen'
-        )
+        ),
 
+        Node(
+            package='auv_autonomy',
+            executable='inspection_mission',
+            name='inspection_mission',
+            output='screen'
+        )
     ])
+

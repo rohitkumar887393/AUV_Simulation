@@ -32,7 +32,8 @@ setup(
             'distance_hold = auv_autonomy.distance_hold:main',
 
             'mission_manager = auv_autonomy.mission_manager:main',
-
+            'inspection_mission = auv_autonomy.inspection_mission:main',
         ],
     },
 )
+
