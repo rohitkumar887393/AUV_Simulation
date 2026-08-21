@@ -876,7 +876,6 @@ HTML_CONTENT = """<!DOCTYPE html>
         let finBottomGroup = null;
         let finRightGroup = null;
         let finLeftGroup = null;
-        let marineSnowPoints = null;
 
         let propRotationAngle = 0.0;
         let currentRudAngle = 0.0;
@@ -891,122 +890,53 @@ HTML_CONTENT = """<!DOCTYPE html>
             const container = document.getElementById('canvas-container');
 
             scene = new THREE.Scene();
-
-            // 1. Realistic Oceanic Gradient Background & Soft Depth Fog
-            const bgCanvas = document.createElement('canvas');
-            bgCanvas.width = 2;
-            bgCanvas.height = 512;
-            const bgCtx = bgCanvas.getContext('2d');
-            const oceanGradient = bgCtx.createLinearGradient(0, 0, 0, 512);
-            oceanGradient.addColorStop(0.0, '#1a5f8a');  // Shallow / surface sunlight penetration
-            oceanGradient.addColorStop(0.35, '#104566'); // Mid-depth ocean blue
-            oceanGradient.addColorStop(0.70, '#0a2e47'); // Deeper marine water
-            oceanGradient.addColorStop(1.0, '#041829');  // Deep abyss floor
-            bgCtx.fillStyle = oceanGradient;
-            bgCtx.fillRect(0, 0, 2, 512);
-
-            const bgTexture = new THREE.CanvasTexture(bgCanvas);
-            scene.background = bgTexture;
-            scene.fog = new THREE.FogExp2(0x0e3d5c, 0.022); // Natural ocean scattering haze
+            scene.background = new THREE.Color(0x030a16);
+            scene.fog = new THREE.FogExp2(0x030a16, 0.02);
 
             camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
             camera.position.set(8, 5, 8);
 
-            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(window.devicePixelRatio);
-            renderer.toneMapping = THREE.ACESFilmicToneMapping;
-            renderer.toneMappingExposure = 1.05;
             container.appendChild(renderer.domElement);
 
             controls = new THREE.OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
             controls.dampingFactor = 0.05;
 
-            // 2. Realistic Underwater Lighting Rig
-            // Diffuse volumetric ambient light (ocean water scatter)
-            const ambientLight = new THREE.AmbientLight(0x286e96, 0.90);
+            // Lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.75);
             scene.add(ambientLight);
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.90);
+            dirLight.position.set(10, 20, 10);
+            scene.add(dirLight);
+            const fillLight = new THREE.DirectionalLight(0x00a8e8, 0.40);
+            fillLight.position.set(-10, -10, -10);
+            scene.add(fillLight);
 
-            // Primary downwelling sunlight filtered through surface
-            const sunLight = new THREE.DirectionalLight(0x8fe0f5, 1.10);
-            sunLight.position.set(12, 30, 8);
-            scene.add(sunLight);
+            // Existing 3D Simulator Grid (Fixed at World Y = 0m)
+            const surfaceGeo = new THREE.GridHelper(100, 50, 0x00a8e8, 0x002244);
+            surfaceGeo.position.y = 0;
+            scene.add(surfaceGeo);
 
-            // Deep upwelling bounce light from ocean depths
-            const bounceLight = new THREE.DirectionalLight(0x0a2d42, 0.50);
-            bounceLight.position.set(-10, -20, -10);
-            scene.add(bounceLight);
-
-            // Secondary lateral fill light
-            const lateralFill = new THREE.DirectionalLight(0x195c80, 0.40);
-            lateralFill.position.set(-12, 10, 15);
-            scene.add(lateralFill);
-
-            // 3. Realistic Water Surface (Y = 0m, depth = 0m, above submerged AUV)
-            const surfaceGeo = new THREE.PlaneGeometry(120, 120, 16, 16);
-            const surfaceMat = new THREE.MeshStandardMaterial({
-                color: 0x48cae4,
+            // Fixed Transparent Water Surface Plane (Above AUV at World Y = 0m)
+            const waterPlaneGeo = new THREE.PlaneGeometry(100, 100);
+            waterPlaneGeo.rotateX(-Math.PI / 2);
+            const waterPlaneMat = new THREE.MeshBasicMaterial({
+                color: 0x00a8e8,
                 transparent: true,
-                opacity: 0.10,
-                roughness: 0.25,
-                metalness: 0.15,
-                side: THREE.DoubleSide
+                opacity: 0.18,
+                side: THREE.DoubleSide,
+                depthWrite: false
             });
-            const surfaceMesh = new THREE.Mesh(surfaceGeo, surfaceMat);
-            surfaceMesh.rotation.x = -Math.PI / 2;
-            surfaceMesh.position.y = 0;
-            scene.add(surfaceMesh);
+            const waterPlane = new THREE.Mesh(waterPlaneGeo, waterPlaneMat);
+            waterPlane.position.y = 0;
+            scene.add(waterPlane);
 
-            // Subtle surface boundary grid
-            const surfaceGrid = new THREE.GridHelper(100, 40, 0x1d587a, 0x0e3247);
-            surfaceGrid.position.y = 0;
-            surfaceGrid.material.transparent = true;
-            surfaceGrid.material.opacity = 0.25;
-            scene.add(surfaceGrid);
-
-            // 4. Subtle Seabed Bathymetric Floor (Y = -12m, representing 12m seabed depth)
-            const seabedGeo = new THREE.PlaneGeometry(120, 120, 16, 16);
-            const seabedMat = new THREE.MeshStandardMaterial({
-                color: 0x051a29,
-                roughness: 0.90,
-                metalness: 0.10
-            });
-            const seabedMesh = new THREE.Mesh(seabedGeo, seabedMat);
-            seabedMesh.rotation.x = -Math.PI / 2;
-            seabedMesh.position.y = -12.0;
-            scene.add(seabedMesh);
-
-            const seabedGrid = new THREE.GridHelper(100, 40, 0x143c59, 0x092236);
-            seabedGrid.position.y = -11.95;
-            seabedGrid.material.transparent = true;
-            seabedGrid.material.opacity = 0.35;
-            scene.add(seabedGrid);
-
-            // 5. Marine Snow / Micro-Particulate Suspended Matter (Living Underwater Environment)
-            const particleCount = 450;
-            const particleGeo = new THREE.BufferGeometry();
-            const particlePositions = new Float32Array(particleCount * 3);
-            for (let i = 0; i < particleCount * 3; i += 3) {
-                particlePositions[i] = (Math.random() - 0.5) * 50;     // X in [-25, 25]
-                particlePositions[i + 1] = -Math.random() * 12;        // Y in [-12, 0] (water column)
-                particlePositions[i + 2] = (Math.random() - 0.5) * 50; // Z in [-25, 25]
-            }
-            particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
-
-            const particleMat = new THREE.PointsMaterial({
-                color: 0x72cce4,
-                size: 0.035,
-                transparent: true,
-                opacity: 0.40,
-                blending: THREE.AdditiveBlending
-            });
-            marineSnowPoints = new THREE.Points(particleGeo, particleMat);
-            scene.add(marineSnowPoints);
-
-            // 6. Trajectory Line
+            // Trajectory Line
             trajectoryGeo = new THREE.BufferGeometry();
-            const trajectoryMat = new THREE.LineBasicMaterial({ color: 0x00f5d4, linewidth: 2, transparent: true, opacity: 0.85 });
+            const trajectoryMat = new THREE.LineBasicMaterial({ color: 0x00f5d4, linewidth: 2 });
             trajectoryLine = new THREE.Line(trajectoryGeo, trajectoryMat);
             scene.add(trajectoryLine);
 
@@ -1021,25 +951,25 @@ HTML_CONTENT = """<!DOCTYPE html>
 
             // Professional Marine Robotics Materials
             const hullMat = new THREE.MeshStandardMaterial({
-                color: 0x18283b,          // Deep Tactical Navy / Blue-Gray Pressure Hull
+                color: 0xfcb001,          // High-Visibility Marine Safety Yellow Hull
                 roughness: 0.35,
-                metalness: 0.70
+                metalness: 0.25
             });
 
             const darkHullMat = new THREE.MeshStandardMaterial({
-                color: 0x0e1724,          // Darkened Modular Structural Sections
-                roughness: 0.40,
-                metalness: 0.75
+                color: 0xf5a600,          // Solid Marine Industrial Yellow Modular Hull Sections
+                roughness: 0.35,
+                metalness: 0.25
             });
 
             const ringMat = new THREE.MeshStandardMaterial({
-                color: 0x223548,          // Anodized Titanium Joint Collars / Rings
-                roughness: 0.25,
+                color: 0x111c28,          // Dark Titanium Joint Collars / Rings
+                roughness: 0.30,
                 metalness: 0.85
             });
 
             const finMat = new THREE.MeshStandardMaterial({
-                color: 0x1f2e3d,          // Muted Matte Marine Hydrofoil Composite
+                color: 0x141f2b,          // Muted Dark Matte Marine Hydrofoil Composite
                 roughness: 0.40,
                 metalness: 0.55
             });
@@ -1688,16 +1618,6 @@ HTML_CONTENT = """<!DOCTYPE html>
             if (finBottomGroup) finBottomGroup.rotation.y = currentRudAngle;
             if (finRightGroup) finRightGroup.rotation.z = currentElevRAngle;
             if (finLeftGroup) finLeftGroup.rotation.z = currentElevLAngle;
-
-            // 3. Marine Snow Gentle Oceanic Drift
-            if (marineSnowPoints) {
-                const posArr = marineSnowPoints.geometry.attributes.position.array;
-                for (let i = 1; i < posArr.length; i += 3) {
-                    posArr[i] -= 0.004; // Gentle downward settling
-                    if (posArr[i] < -12.0) posArr[i] = 0.0; // Wrap back to surface
-                }
-                marineSnowPoints.geometry.attributes.position.needsUpdate = true;
-            }
 
             renderer.render(scene, camera);
         }
