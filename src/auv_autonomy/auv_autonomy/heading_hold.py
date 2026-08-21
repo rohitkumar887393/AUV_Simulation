@@ -112,33 +112,72 @@ class HeadingHold(Node):
             'Heading Hold Started (Continuous Closed-Loop Control Active)'
         )
 
+        # Subscribe to explicit enable/disable commands for heading hold
+        self.create_subscription(
+            Float32,
+            '/auv/heading_hold_enabled',
+            self.heading_hold_enable_callback,
+            10
+        )
+
     def desired_heading_callback(self, msg):
-        """Accept external/mission heading target."""
+        """Accept external/mission heading target — updates target only, does NOT enable hold."""
         new_target = float(msg.data)
-        if abs(self.target_heading - new_target) < 1e-4 and self.heading_hold_enabled:
+        if abs(self.target_heading - new_target) < 1e-4:
             return
 
         self.target_heading = new_target
         self.target_source = 'EXTERNAL'
-        self.heading_hold_enabled = True
 
-        self.pid.integral = 0.0
-        self.pid.prev_error = 0.0
-        self.prev_time = self.get_clock().now()
+        # Only reset PID if heading hold is currently active
+        if self.heading_hold_enabled:
+            self.pid.integral = 0.0
+            self.pid.prev_error = 0.0
+            self.prev_time = self.get_clock().now()
 
-        state = Float32()
-        state.data = 1.0
-        self.state_pub.publish(state)
+            # Re-publish active target for HUD since it changed while active
+            active = Float32()
+            active.data = self.target_heading
+            self.active_target_pub.publish(active)
 
-        status = String()
-        status.data = f"ON:{self.target_heading:.1f}"
-        self.status_pub.publish(status)
+            status = String()
+            status.data = f"ON:{self.target_heading:.1f}"
+            self.status_pub.publish(status)
 
-        active = Float32()
-        active.data = self.target_heading
-        self.active_target_pub.publish(active)
+        self.get_logger().info(f'DESIRED HEADING TARGET UPDATED (EXTERNAL): {self.target_heading:.1f}° (hold_enabled={self.heading_hold_enabled})')
 
-        self.get_logger().info(f"DESIRED HEADING SET (EXTERNAL): {self.target_heading:.1f}°")
+    def heading_hold_enable_callback(self, msg):
+        """Explicit enable/disable of heading hold from mission or external command."""
+        enable = bool(msg.data)
+        if enable and not self.heading_hold_enabled:
+            self.heading_hold_enabled = True
+            self.target_source = 'EXTERNAL'
+            self.pid.integral = 0.0
+            self.pid.prev_error = 0.0
+            self.prev_time = self.get_clock().now()
+
+            status = String()
+            status.data = f"ON:{self.target_heading:.1f}"
+            self.status_pub.publish(status)
+
+            active = Float32()
+            active.data = self.target_heading
+            self.active_target_pub.publish(active)
+
+            self.get_logger().info(f'HEADING HOLD ENABLED (EXTERNAL): target={self.target_heading:.1f}°')
+        elif not enable and self.heading_hold_enabled:
+            self.heading_hold_enabled = False
+            self.target_source = 'NONE'
+
+            status = String()
+            status.data = "OFF"
+            self.status_pub.publish(status)
+
+            cmd = Float32()
+            cmd.data = 0.0
+            self.rudder_pub.publish(cmd)
+
+            self.get_logger().info('HEADING HOLD DISABLED (EXTERNAL)')
 
     def joy_callback(self, msg):
 

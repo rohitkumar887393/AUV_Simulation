@@ -113,44 +113,87 @@ HTML_CONTENT = """<!DOCTYPE html>
             z-index: 1;
         }
 
+        /* Custom Scrollbar for HUD panels */
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(3, 14, 28, 0.6);
+            border-radius: 2px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #00a8e8;
+            border-radius: 2px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00f5d4;
+        }
+
         /* Top HUD Bar */
         #top-hud-bar {
             position: absolute;
             top: 0;
             left: 0;
             width: 100vw;
-            height: 52px;
-            background: rgba(3, 14, 28, 0.94);
-            border-bottom: 2px solid #00a8e8;
-            box-shadow: 0 4px 20px rgba(0, 168, 232, 0.3);
+            height: 42px;
+            background: rgba(3, 14, 28, 0.96);
+            border-bottom: 1.5px solid #00a8e8;
+            box-shadow: 0 2px 15px rgba(0, 168, 232, 0.25);
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            padding: 0 24px;
-            gap: 18px;
-            z-index: 10;
-            font-size: 14px;
-            letter-spacing: 1px;
+            padding: 0 16px;
+            z-index: 20;
+            font-size: 12px;
+            letter-spacing: 0.8px;
         }
 
-        .hud-pill {
+        .hud-group-left {
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 6px 14px;
-            border-radius: 16px;
-            border: 1px solid #1c3d5a;
+        }
+
+        .hud-group-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #header-title {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: #ffffff;
+            text-shadow: 0 0 12px rgba(0, 245, 212, 0.7), 0 0 24px rgba(0, 168, 232, 0.4);
+            white-space: nowrap;
+            pointer-events: none;
+        }
+
+        .hud-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 3px 9px;
+            border-radius: 4px;
+            border: 1px solid #00a8e8;
             background: rgba(10, 25, 47, 0.8);
+            font-size: 11px;
         }
 
         .dot-indicator {
-            width: 10px;
-            height: 10px;
+            width: 7px;
+            height: 7px;
             border-radius: 50%;
             display: inline-block;
         }
 
-        .dot-disarmed { background: #d90429; box-shadow: 0 0 10px #d90429; }
-        .dot-armed { background: #00f5d4; box-shadow: 0 0 12px #00f5d4; }
+        .dot-disarmed { background: #d90429; box-shadow: 0 0 8px #d90429; }
+        .dot-armed { background: #00f5d4; box-shadow: 0 0 10px #00f5d4; }
 
         .hud-divider {
             color: #1c3d5a;
@@ -158,10 +201,10 @@ HTML_CONTENT = """<!DOCTYPE html>
         }
 
         .gain-bar-container {
-            width: 80px;
-            height: 10px;
+            width: 55px;
+            height: 7px;
             background: #0d2238;
-            border-radius: 5px;
+            border-radius: 4px;
             overflow: hidden;
             border: 1px solid #00a8e8;
         }
@@ -169,18 +212,19 @@ HTML_CONTENT = """<!DOCTYPE html>
         .gain-bar-fill {
             height: 100%;
             width: 75%;
-            background: linear-gradient(90deg, #0077b6, #00f5d4);
-            box-shadow: 0 0 10px #00f5d4;
+            background: #00f5d4;
+            box-shadow: 0 0 8px #00f5d4;
         }
 
         .badge-box {
-            padding: 5px 12px;
-            border-radius: 5px;
+            padding: 3px 8px;
+            border-radius: 4px;
             border: 1px solid #00a8e8;
             background: rgba(0, 168, 232, 0.15);
             color: #00f5d4;
             font-weight: bold;
-            font-size: 13px;
+            font-size: 11px;
+            letter-spacing: 0.5px;
         }
 
         .badge-disabled {
@@ -193,30 +237,40 @@ HTML_CONTENT = """<!DOCTYPE html>
             border-color: #00f5d4;
             color: #00f5d4;
             background: rgba(0, 245, 212, 0.2);
-            box-shadow: 0 0 10px rgba(0, 245, 212, 0.4);
+            box-shadow: 0 0 8px rgba(0, 245, 212, 0.35);
         }
 
-        /* Left HUD Telemetry Panel */
-        #telemetry-panel {
+        /* Left Sidebar Container */
+        #left-sidebar {
             position: absolute;
-            top: 64px;
-            left: 16px;
-            width: 380px;
+            top: 50px;
+            left: 14px;
+            width: 255px;
+            max-height: calc(100vh - 58px);
+            overflow-y: auto;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            z-index: 10;
+            padding-right: 2px;
+        }
+
+        .hud-card {
             background: rgba(3, 14, 28, 0.94);
             border: 1.5px solid #00a8e8;
-            border-radius: 8px;
-            padding: 12px 16px;
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
-            z-index: 10;
+            border-radius: 5px;
+            padding: 6px 9px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
         }
 
         .panel-header {
-            font-size: 14px;
+            font-size: 11px;
             color: #00f5d4;
-            border-bottom: 1.5px solid #1c3d5a;
-            padding-bottom: 6px;
-            margin-bottom: 10px;
-            letter-spacing: 1.5px;
+            border-bottom: 1px solid #1c3d5a;
+            padding-bottom: 3px;
+            margin-bottom: 4px;
+            letter-spacing: 1px;
             font-weight: bold;
             display: flex;
             justify-content: space-between;
@@ -225,161 +279,33 @@ HTML_CONTENT = """<!DOCTYPE html>
         .telem-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 6px;
-            font-size: 13px;
-        }
-
-        .telem-label { color: #8d99ae; }
-        .telem-val { color: #ffffff; font-weight: bold; }
-        .telem-val-highlight { color: #ffb703; font-weight: bold; }
-
-        /* Left Side: Mission Control Panel (Shifted to Left) */
-        #mission-panel {
-            position: absolute;
-            top: 350px;
-            left: 16px;
-            width: 380px;
-            background: rgba(3, 14, 28, 0.96);
-            border: 1.5px solid #00f5d4;
-            border-radius: 8px;
-            padding: 14px 16px;
-            box-shadow: 0 0 30px rgba(0, 245, 212, 0.25);
-            z-index: 10;
-        }
-
-        .mission-row {
-            display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 9px;
-            font-size: 13px;
-            font-weight: bold;
-        }
-
-        .mission-input {
-            width: 100px;
-            height: 30px;
-            background: #0a192f;
-            border: 1.5px solid #00a8e8;
-            color: #00f5d4;
-            padding: 2px 8px;
-            border-radius: 5px;
-            font-family: inherit;
-            font-size: 13px;
-            font-weight: bold;
-            text-align: right;
-        }
-
-        .mission-btn-row {
-            display: flex;
-            gap: 8px;
-            margin-top: 10px;
-            margin-bottom: 10px;
-        }
-
-        .mission-btn {
-            padding: 8px 6px;
-            border-radius: 6px;
-            font-family: inherit;
-            font-size: 12px;
-            font-weight: bold;
-            cursor: pointer;
-            border: 1.5px solid transparent;
-            transition: all 0.2s;
-        }
-
-        .btn-start {
-            flex: 2;
-            background: rgba(0, 245, 212, 0.25);
-            color: #00f5d4;
-            border-color: #00f5d4;
-            font-size: 13px;
-        }
-        .btn-start:hover {
-            background: #00f5d4;
-            color: #030a16;
-            box-shadow: 0 0 16px #00f5d4;
-        }
-
-        .btn-stop {
-            flex: 1;
-            background: rgba(217, 4, 41, 0.25);
-            color: #ef233c;
-            border-color: #d90429;
-        }
-        .btn-stop:hover {
-            background: #d90429;
-            color: #ffffff;
-            box-shadow: 0 0 16px #d90429;
-        }
-
-        .btn-reset {
-            flex: 1;
-            background: rgba(255, 183, 3, 0.25);
-            color: #ffb703;
-            border-color: #ffb703;
-        }
-        .btn-reset:hover {
-            background: #ffb703;
-            color: #030a16;
-            box-shadow: 0 0 16px #ffb703;
-        }
-
-        .mission-status-box {
-            background: rgba(10, 25, 47, 0.9);
-            border: 1.5px solid #1c3d5a;
-            border-radius: 6px;
-            padding: 7px;
-            text-align: center;
-            margin-top: 6px;
-        }
-
-        .mission-status-title {
+            margin-bottom: 2.5px;
             font-size: 11px;
-            color: #8d99ae;
-            letter-spacing: 1.5px;
-            font-weight: bold;
-            margin-bottom: 2px;
+            line-height: 1.25;
         }
 
-        .mission-status-val {
-            font-size: 18px;
-            font-weight: bold;
-            letter-spacing: 2px;
-            color: #00f5d4;
-            text-shadow: 0 0 10px rgba(0, 245, 212, 0.5);
-        }
+        .telem-label { color: #8d99ae; font-size: 10.5px; }
+        .telem-val { color: #ffffff; font-weight: bold; font-size: 11px; text-align: right; }
+        .telem-val-highlight { color: #ffb703; font-weight: bold; font-size: 11px; text-align: right; }
 
         /* Left Side: Propulsion Panel */
-        #propulsion-panel {
-            position: absolute;
-            top: 668px;
-            left: 16px;
-            width: 380px;
-            background: rgba(3, 14, 28, 0.94);
-            border: 1.5px solid #00a8e8;
-            border-radius: 8px;
-            padding: 10px 16px;
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
-            z-index: 10;
-        }
-
         .pwm-bar-wrapper {
-            margin-bottom: 6px;
+            margin-bottom: 3.5px;
         }
 
         .pwm-label-row {
             display: flex;
             justify-content: space-between;
-            font-size: 11px;
+            font-size: 10px;
             margin-bottom: 2px;
             font-weight: bold;
         }
 
         .pwm-track {
-            height: 9px;
+            height: 6px;
             background: #0d2238;
-            border-radius: 5px;
+            border-radius: 3px;
             overflow: hidden;
             border: 1px solid #1c3d5a;
         }
@@ -388,120 +314,252 @@ HTML_CONTENT = """<!DOCTYPE html>
             height: 100%;
             width: 50%;
             background: #00f5d4;
+            box-shadow: 0 0 6px #00f5d4;
         }
 
         /* Left Side: Physics Debug Data Panel */
         #physics-debug-panel {
-            position: absolute;
-            top: 818px;
-            left: 16px;
-            width: 380px;
-            background: rgba(3, 14, 28, 0.94);
-            border: 1.5px solid #ffb703;
-            border-radius: 8px;
-            padding: 10px 16px;
-            box-shadow: 0 0 30px rgba(255, 183, 3, 0.25);
-            z-index: 10;
-            font-size: 12px;
+            border-color: #00a8e8;
+            font-size: 10.5px;
         }
 
-        /* Full Right Side: Unified Mission & Control Telemetry Panel */
-        #unified-telemetry-panel {
-            position: absolute;
-            top: 64px;
-            right: 16px;
-            width: 480px;
-            max-height: calc(100vh - 100px);
-            overflow-y: auto;
-            background: rgba(3, 14, 28, 0.96);
-            border: 2px solid #00f5d4;
-            border-radius: 10px;
-            padding: 18px 22px;
-            box-shadow: 0 0 35px rgba(0, 245, 212, 0.3);
-            z-index: 10;
-        }
-
-        #unified-telemetry-panel .panel-header {
-            font-size: 16px;
-            color: #00f5d4;
-            border-bottom: 1.5px solid #00f5d4;
-            padding-bottom: 8px;
-            margin-bottom: 12px;
-            letter-spacing: 1.5px;
-            font-weight: bold;
-        }
-
-        #unified-telemetry-panel .hud-section-header {
-            color: #00f5d4;
-            font-size: 14px;
-            font-weight: bold;
-            margin-top: 12px;
-            margin-bottom: 6px;
-            letter-spacing: 1.2px;
-        }
-
-        #unified-telemetry-panel .hud-divider-line {
-            border-bottom: 1px solid #1c3d5a;
-            margin: 8px 0;
-        }
-
-        #unified-telemetry-panel .telem-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 15px;
-            line-height: 1.4;
-        }
-
-        #unified-telemetry-panel .telem-label {
-            color: #8d99ae;
-            font-size: 14px;
-        }
-
-        #unified-telemetry-panel .telem-val {
-            color: #ffffff;
-            font-weight: bold;
-            font-size: 15px;
-        }
-
-        #unified-telemetry-panel .telem-val-highlight {
+        #physics-debug-panel .panel-header {
             color: #ffb703;
-            font-weight: bold;
-            font-size: 15px;
+            border-bottom-color: rgba(255, 183, 3, 0.4);
         }
 
-
-
-        /* Camera Controls */
-        #cam-mode-box {
+        /* Top-Right Compass */
+        #compass-container {
             position: absolute;
-            bottom: 16px;
-            right: 16px;
+            top: 48px;
+            right: 14px;
+            width: 125px;
+            height: 125px;
+            z-index: 15;
+            filter: drop-shadow(0 0 12px rgba(0, 245, 212, 0.2));
+            pointer-events: none;
+        }
+
+        /* Right Sidebar Container (Bottom Right) */
+        #right-sidebar {
+            position: absolute;
+            top: 178px;
+            right: 14px;
+            width: 265px;
+            max-height: calc(100vh - 186px);
+            overflow-y: auto;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            z-index: 10;
+            padding-right: 2px;
+        }
+
+        /* Camera Controls (Bottom Right) */
+        #cam-mode-box {
             background: rgba(3, 14, 28, 0.94);
             border: 1.5px solid #00a8e8;
-            border-radius: 6px;
-            padding: 8px 12px;
+            border-radius: 5px;
+            padding: 5px 6px;
             display: flex;
-            gap: 8px;
-            z-index: 10;
+            justify-content: space-between;
+            gap: 4px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
         }
 
         .cam-btn {
-            background: rgba(0, 119, 182, 0.4);
+            flex: 1;
+            background: rgba(0, 119, 182, 0.35);
             color: #00f5d4;
             border: 1px solid #00a8e8;
-            padding: 6px 12px;
-            border-radius: 4px;
+            padding: 4px 2px;
+            border-radius: 3px;
             cursor: pointer;
             font-family: inherit;
-            font-size: 12px;
+            font-size: 10.5px;
             font-weight: bold;
-            transition: all 0.2s;
+            text-align: center;
+            transition: all 0.15s;
+            white-space: nowrap;
         }
 
         .cam-btn:hover {
             background: #00b4d8;
             color: #030a16;
+            box-shadow: 0 0 8px #00b4d8;
+        }
+
+        /* Unified Mission & Control Telemetry Panel */
+        #unified-telemetry-panel {
+            border-color: #00a8e8;
+            padding: 6px 9px;
+        }
+
+        #unified-telemetry-panel .panel-header {
+            font-size: 11px;
+            color: #00f5d4;
+            border-bottom: 1px solid #1c3d5a;
+            padding-bottom: 3px;
+            margin-bottom: 3px;
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
+
+        #unified-telemetry-panel .hud-section-header {
+            color: #00f5d4;
+            font-size: 10.5px;
+            font-weight: bold;
+            margin-top: 3.5px;
+            margin-bottom: 1px;
+            letter-spacing: 0.8px;
+        }
+
+        #unified-telemetry-panel .hud-divider-line {
+            border-bottom: 1px solid #1c3d5a;
+            margin: 3px 0;
+        }
+
+        #unified-telemetry-panel .telem-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2px;
+            font-size: 10.5px;
+            line-height: 1.2;
+        }
+
+        #unified-telemetry-panel .telem-label {
+            color: #8d99ae;
+            font-size: 10px;
+        }
+
+        #unified-telemetry-panel .telem-val {
+            color: #ffffff;
+            font-weight: bold;
+            font-size: 10.5px;
+            text-align: right;
+        }
+
+        #unified-telemetry-panel .telem-val-highlight {
+            color: #ffb703;
+            font-weight: bold;
+            font-size: 10.5px;
+            text-align: right;
+        }
+
+        /* Mission Control Panel */
+        #mission-panel {
+            border-color: #00a8e8;
+            padding: 6px 9px;
+        }
+
+        #mission-panel .panel-header {
+            font-size: 11px;
+            padding-bottom: 3px;
+            margin-bottom: 4px;
+        }
+
+        .mission-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3px;
+            font-size: 10.5px;
+            font-weight: bold;
+        }
+
+        .mission-input {
+            width: 60px;
+            height: 19px;
+            background: #0a192f;
+            border: 1px solid #00a8e8;
+            color: #00f5d4;
+            padding: 0 4px;
+            border-radius: 3px;
+            font-family: inherit;
+            font-size: 10.5px;
+            font-weight: bold;
+            text-align: right;
+        }
+
+        .mission-btn-row {
+            display: flex;
+            gap: 4px;
+            margin-top: 4px;
+            margin-bottom: 4px;
+        }
+
+        .mission-btn {
+            padding: 4px 3px;
+            border-radius: 3px;
+            font-family: inherit;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.15s;
+        }
+
+        .btn-start {
+            flex: 1.8;
+            background: rgba(0, 245, 212, 0.25);
+            color: #00f5d4;
+            border-color: #00f5d4;
+        }
+        .btn-start:hover {
+            background: #00f5d4;
+            color: #030a16;
+            box-shadow: 0 0 10px #00f5d4;
+        }
+
+        .btn-stop {
+            flex: 1.2;
+            background: rgba(217, 4, 41, 0.25);
+            color: #ef233c;
+            border-color: #d90429;
+        }
+        .btn-stop:hover {
+            background: #d90429;
+            color: #ffffff;
+            box-shadow: 0 0 10px #d90429;
+        }
+
+        .mission-status-box {
+            background: rgba(10, 25, 47, 0.9);
+            border: 1px solid #1c3d5a;
+            border-radius: 3px;
+            padding: 3px 4px;
+            text-align: center;
+            margin-top: 3px;
+        }
+
+        .mission-status-title {
+            font-size: 8.5px;
+            color: #8d99ae;
+            letter-spacing: 0.8px;
+            font-weight: bold;
+            margin-bottom: 0px;
+        }
+
+        .mission-status-val {
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            color: #00f5d4;
+            text-shadow: 0 0 6px rgba(0, 245, 212, 0.4);
+        }
+
+        @media (max-width: 1200px) {
+            #left-sidebar { width: 240px; }
+            #right-sidebar { width: 250px; }
+            #header-title { font-size: 15px; }
+        }
+        @media (max-height: 768px) {
+            #top-hud-bar { height: 36px; font-size: 11px; }
+            #left-sidebar { top: 42px; gap: 4px; }
+            #compass-container { top: 42px; width: 115px; height: 115px; }
+            #right-sidebar { top: 165px; }
+            .hud-card { padding: 4px 7px; }
         }
     </style>
     <!-- Three.js & OrbitControls -->
@@ -513,191 +571,295 @@ HTML_CONTENT = """<!DOCTYPE html>
 
     <!-- Top HUD Status Bar -->
     <div id="top-hud-bar">
-        <div class="hud-pill" onclick="toggleArm()" style="cursor: pointer;" title="Click to Arm / Disarm (or Spacebar)">
-            <span class="dot-indicator dot-disarmed" id="dot-armed"></span>
-            <span id="txt-armed" style="font-weight: bold;">DISARMED</span>
-        </div>
-
-        <span class="hud-divider">|</span>
-
-        <span>GAIN</span>
-        <div class="gain-bar-container">
-            <div class="gain-bar-fill" id="bar-gain"></div>
-        </div>
-        <span id="txt-gain">75%</span>
-
-        <span class="hud-divider">|</span>
-
-        <div class="badge-box" id="badge-mode">MANUAL</div>
-
-        <span class="hud-divider">|</span>
-
-        <div class="badge-box badge-disabled" id="badge-depth-hold">DEPTH HOLD: OFF</div>
-        <div class="badge-box badge-disabled" id="badge-heading-hold">HEADING HOLD: OFF</div>
-        <div class="badge-box badge-enabled" id="badge-roll-stab">ROLL STABILIZER: ACTIVE</div>
-
-        <span class="hud-divider">|</span>
-        <div class="badge-box badge-disabled" id="badge-joy">JOYSTICK: CONNECTED</div>
-    </div>
-
-    <!-- Left Telemetry Panel -->
-    <div id="telemetry-panel">
-        <div class="panel-header">
-            <span>TELEMETRY DATA</span>
-            <span style="font-size: 12px; color: #8d99ae;" id="txt-packets">0 pkts</span>
-        </div>
-
-        <div style="position: relative;">
-
-            <div class="telem-row"><span class="telem-label">ROLL:</span> <span class="telem-val" id="val-roll">+0.0°</span></div>
-            <div class="telem-row"><span class="telem-label">PITCH:</span> <span class="telem-val" id="val-pitch">+0.0°</span></div>
-            <div class="telem-row"><span class="telem-label">YAW:</span> <span class="telem-val-highlight" id="val-yaw">+0.0°</span></div>
-
-            <div style="height: 6px;"></div>
-
-            <div class="telem-row"><span class="telem-label">SPEED X:</span> <span class="telem-val" id="val-vx">+0.00 m/s</span></div>
-            <div class="telem-row"><span class="telem-label">SPEED Y:</span> <span class="telem-val" id="val-vy">+0.00 m/s</span></div>
-            <div class="telem-row"><span class="telem-label">SPEED Z:</span> <span class="telem-val" id="val-vz">+0.00 m/s</span></div>
-
-            <div style="height: 6px;"></div>
-
-            <div class="telem-row"><span class="telem-label">DEPTH:</span> <span class="telem-val-highlight" id="val-depth">0.50 m</span></div>
-            <div class="telem-row"><span class="telem-label">LIN VELOCITY:</span> <span class="telem-val" id="val-lin-vel">[+0.0, +0.0, +0.0] m/s</span></div>
-            <div class="telem-row"><span class="telem-label">IMU ACCEL:</span> <span class="telem-val" id="val-imu-accel">[+0.0, +0.0, -9.8] m/s²</span></div>
-            <div class="telem-row"><span class="telem-label">WORLD MOTION:</span> <span class="telem-val-highlight" id="val-motion">NONE</span></div>
-        </div>
-    </div>
-
-    <!-- Unified Mission & Control Telemetry Panel -->
-    <div id="unified-telemetry-panel">
-        <div class="panel-header" style="color: #00f5d4; border-color: #00f5d4; font-size: 14px;">MISSION & CONTROL TELEMETRY</div>
-
-        <div class="hud-section-header">MISSION</div>
-        <div class="telem-row"><span class="telem-label">PHASE:</span> <span class="telem-val-highlight" id="ut-phase">IDLE</span></div>
-        <div class="telem-row"><span class="telem-label">MISSION TIME:</span> <span class="telem-val" id="ut-time">00:00 / 30:00</span></div>
-
-        <div class="hud-divider-line"></div>
-
-        <div class="hud-section-header">DEPTH</div>
-        <div class="telem-row"><span class="telem-label">TARGET:</span> <span class="telem-val" id="ut-depth-tgt">0.00 m</span></div>
-        <div class="telem-row"><span class="telem-label">CURRENT:</span> <span class="telem-val" id="ut-depth-cur">0.50 m</span></div>
-        <div class="telem-row"><span class="telem-label">ERROR:</span> <span class="telem-val-highlight" id="ut-depth-err">+0.00 m</span></div>
-        <div class="telem-row"><span class="telem-label">PID OUTPUT:</span> <span class="telem-val" id="ut-depth-out">+0.0</span></div>
-
-        <div class="hud-divider-line"></div>
-
-        <div class="hud-section-header">HEADING</div>
-        <div class="telem-row"><span class="telem-label">TARGET:</span> <span class="telem-val" id="ut-head-tgt">0.0°</span></div>
-        <div class="telem-row"><span class="telem-label">CURRENT:</span> <span class="telem-val" id="ut-head-cur">0.0°</span></div>
-        <div class="telem-row"><span class="telem-label">ERROR:</span> <span class="telem-val-highlight" id="ut-head-err">+0.0°</span></div>
-        <div class="telem-row"><span class="telem-label">PID OUTPUT:</span> <span class="telem-val" id="ut-head-out">+0.0</span></div>
-
-        <div class="hud-divider-line"></div>
-
-        <div class="hud-section-header">SPEED</div>
-        <div class="telem-row"><span class="telem-label">TARGET:</span> <span class="telem-val" id="ut-spd-tgt">0.00 m/s</span></div>
-        <div class="telem-row"><span class="telem-label">COMMAND:</span> <span class="telem-val" id="ut-spd-cmd">0.00 m/s</span></div>
-        <div class="telem-row"><span class="telem-label">ACTUAL:</span> <span class="telem-val-highlight" id="ut-spd-act">0.00 m/s</span></div>
-
-        <div class="hud-divider-line"></div>
-
-        <div class="hud-section-header">ACTUATOR OUTPUT</div>
-        <div class="telem-row"><span class="telem-label">THRUSTER CMD:</span> <span class="telem-val" id="ut-act-thr">1500 us</span></div>
-        <div class="telem-row"><span class="telem-label">ELEVATOR CMD:</span> <span class="telem-val" id="ut-act-elev">1500 us</span></div>
-        <div class="telem-row"><span class="telem-label">RUDDER CMD:</span> <span class="telem-val" id="ut-act-rud">1500 us</span></div>
-
-        <div class="hud-divider-line"></div>
-
-        <div class="hud-section-header">PHYSICAL STATE</div>
-        <div class="telem-row"><span class="telem-label">FORWARD SPEED:</span> <span class="telem-val" id="ut-phys-fwd">0.00 m/s</span></div>
-        <div class="telem-row"><span class="telem-label">VERTICAL SPEED:</span> <span class="telem-val" id="ut-phys-vz">0.00 m/s</span></div>
-        <div class="telem-row"><span class="telem-label">PITCH:</span> <span class="telem-val" id="ut-phys-pitch">0.0°</span></div>
-        <div class="telem-row"><span class="telem-label">YAW:</span> <span class="telem-val" id="ut-phys-yaw">0.0°</span></div>
-        <div class="telem-row"><span class="telem-label">ROLL:</span> <span class="telem-val" id="ut-phys-roll">0.0°</span></div>
-        <div class="telem-row"><span class="telem-label">DEPTH:</span> <span class="telem-val" id="ut-phys-depth">0.50 m</span></div>
-    </div>
-
-    <!-- Left-Side Mission Control Panel -->
-    <div id="mission-panel">
-        <div class="panel-header">MISSION CONTROL</div>
-
-        <div class="mission-row">
-            <span class="telem-label">TARGET DEPTH</span>
-            <span><input type="number" id="input-depth" step="0.5" value="20.00" class="mission-input"> m</span>
-        </div>
-        <div class="mission-row">
-            <span class="telem-label">TARGET SPEED</span>
-            <span><input type="number" id="input-speed" step="0.05" value="1.00" class="mission-input"> m/s</span>
-        </div>
-        <div class="mission-row">
-            <span class="telem-label">TARGET HEADING</span>
-            <span><input type="number" id="input-heading" step="1.0" value="90.0" class="mission-input"> deg</span>
-        </div>
-        <div class="mission-row">
-            <span class="telem-label">MISSION TIME</span>
-            <span><input type="number" id="input-duration" step="1" value="30" class="mission-input"> min</span>
-        </div>
-
-        <div class="mission-btn-row">
-            <button class="mission-btn btn-start" onclick="startMission()">START MISSION</button>
-            <button class="mission-btn btn-stop" onclick="stopMission()">STOP MISSION</button>
-        </div>
-
-        <div class="mission-status-box">
-            <div class="mission-status-title">MISSION STATUS</div>
-            <div id="txt-mission-status" class="mission-status-val">IDLE</div>
-        </div>
-    </div>
-
-
-
-    <!-- Physics Debug Data Panel -->
-    <div id="physics-debug-panel">
-        <div class="panel-header" style="color: #ffb703; border-color: #ffb703; font-size: 14px;">PHYSICS DEBUG TELEMETRY</div>
-        <div class="telem-row"><span class="telem-label">BUOYANCY FORCE:</span> <span class="telem-val-highlight" id="phys-buoyancy">+12.3 N</span></div>
-        <div class="telem-row"><span class="telem-label">THRUST FORCE:</span> <span class="telem-val" id="phys-thrust">+0.0 N</span></div>
-        <div class="telem-row"><span class="telem-label">FORWARD DRAG:</span> <span class="telem-val" id="phys-drag">-0.0 N</span></div>
-        <div class="telem-row"><span class="telem-label">DYNAMIC PRESS:</span> <span class="telem-val-highlight" id="phys-qdyn">0.0 Pa</span></div>
-        <div class="telem-row"><span class="telem-label">PITCH MOMENT:</span> <span class="telem-val" id="phys-mpitch">0.00 Nm</span></div>
-        <div class="telem-row"><span class="telem-label">YAW MOMENT:</span> <span class="telem-val" id="phys-nyaw">0.00 Nm</span></div>
-        <div class="telem-row"><span class="telem-label">ROLL MOMENT:</span> <span class="telem-val" id="phys-lroll">0.00 Nm</span></div>
-    </div>
-
-    <!-- Bottom Propulsion Panel -->
-    <div id="propulsion-panel">
-        <div class="panel-header" style="font-size: 14px;">PROPULSION & CONTROL SURFACES</div>
-
-        <div class="pwm-bar-wrapper">
-            <div class="pwm-label-row">
-                <span class="telem-label">MAIN THRUSTER PWM:</span>
-                <span class="telem-val" id="val-thr-pwm">1500 us (+0%)</span>
+        <div class="hud-group-left">
+            <div class="hud-pill" onclick="toggleArm()" style="cursor: pointer;" title="Click to Arm / Disarm (or Spacebar)">
+                <span class="dot-indicator dot-disarmed" id="dot-armed"></span>
+                <span id="txt-armed" style="font-weight: bold;">DISARMED</span>
             </div>
-            <div class="pwm-track"><div class="pwm-fill" id="fill-thr-pwm"></div></div>
+
+            <span class="hud-divider">|</span>
+
+            <span>GAIN</span>
+            <div class="gain-bar-container">
+                <div class="gain-bar-fill" id="bar-gain"></div>
+            </div>
+            <span id="txt-gain">75%</span>
+
+            <span class="hud-divider">|</span>
+
+            <div class="badge-box" id="badge-mode">MANUAL</div>
         </div>
 
-        <div class="pwm-bar-wrapper">
-            <div class="pwm-label-row">
-                <span class="telem-label">ELEVATOR PWM:</span>
-                <span class="telem-val" id="val-elev-pwm">1500 us (+0%)</span>
-            </div>
-            <div class="pwm-track"><div class="pwm-fill" id="fill-elev-pwm"></div></div>
-        </div>
+        <div id="header-title">CORATIA AUV SIMULATOR</div>
 
-        <div class="pwm-bar-wrapper">
-            <div class="pwm-label-row">
-                <span class="telem-label">RUDDER PWM:</span>
-                <span class="telem-val" id="val-rud-pwm">1500 us (+0%)</span>
-            </div>
-            <div class="pwm-track"><div class="pwm-fill" id="fill-rud-pwm"></div></div>
+        <div class="hud-group-right">
+            <div class="badge-box badge-disabled" id="badge-depth-hold">DEPTH HOLD: OFF</div>
+            <div class="badge-box badge-disabled" id="badge-heading-hold">HEADING HOLD: OFF</div>
+            <div class="badge-box badge-enabled" id="badge-roll-stab">ROLL STABILIZER: ACTIVE</div>
+            <div class="badge-box badge-disabled" id="badge-joy">JOYSTICK: DISCONNECTED</div>
         </div>
     </div>
 
-    <!-- Camera Mode Buttons -->
-    <div id="cam-mode-box">
-        <button class="cam-btn" onclick="setCameraMode('orbit')">Free Orbit</button>
-        <button class="cam-btn" onclick="setCameraMode('follow')">Follow AUV</button>
-        <button class="cam-btn" onclick="setCameraMode('top')">Top View</button>
-        <button class="cam-btn" onclick="setCameraMode('side')">Side View</button>
+    <!-- Left Panels Sidebar -->
+    <div id="left-sidebar">
+        <!-- Telemetry Data Panel -->
+        <div id="telemetry-panel" class="hud-card">
+            <div class="panel-header">
+                <span>TELEMETRY DATA</span>
+                <span style="font-size: 10px; color: #8d99ae;" id="txt-packets">0 pkts</span>
+            </div>
+
+            <div>
+                <div class="telem-row"><span class="telem-label">ROLL:</span> <span class="telem-val" id="val-roll">+0.0°</span></div>
+                <div class="telem-row"><span class="telem-label">PITCH:</span> <span class="telem-val" id="val-pitch">+0.0°</span></div>
+                <div class="telem-row"><span class="telem-label">YAW:</span> <span class="telem-val-highlight" id="val-yaw">+0.0°</span></div>
+
+                <div style="height: 3px;"></div>
+
+                <div class="telem-row"><span class="telem-label">SPEED X:</span> <span class="telem-val" id="val-vx">+0.00 m/s</span></div>
+                <div class="telem-row"><span class="telem-label">SPEED Y:</span> <span class="telem-val" id="val-vy">+0.00 m/s</span></div>
+                <div class="telem-row"><span class="telem-label">SPEED Z:</span> <span class="telem-val" id="val-vz">+0.00 m/s</span></div>
+
+                <div style="height: 3px;"></div>
+
+                <div class="telem-row"><span class="telem-label">DEPTH:</span> <span class="telem-val-highlight" id="val-depth">0.50 m</span></div>
+                <div class="telem-row"><span class="telem-label">LIN VELOCITY:</span> <span class="telem-val" id="val-lin-vel">[+0.0, +0.0, +0.0] m/s</span></div>
+                <div class="telem-row"><span class="telem-label">IMU ACCEL:</span> <span class="telem-val" id="val-imu-accel">[+0.0, +0.0, -9.8] m/s²</span></div>
+                <div class="telem-row"><span class="telem-label">WORLD MOTION:</span> <span class="telem-val-highlight" id="val-motion">NONE</span></div>
+            </div>
+        </div>
+
+        <!-- Propulsion Panel -->
+        <div id="propulsion-panel" class="hud-card">
+            <div class="panel-header">PROPULSION & CONTROL SURFACES</div>
+
+            <div class="pwm-bar-wrapper">
+                <div class="pwm-label-row">
+                    <span class="telem-label">MAIN THRUSTER PWM:</span>
+                    <span class="telem-val" id="val-thr-pwm">1500 us (0%)</span>
+                </div>
+                <div class="pwm-track"><div class="pwm-fill" id="fill-thr-pwm"></div></div>
+            </div>
+
+            <div class="pwm-bar-wrapper">
+                <div class="pwm-label-row">
+                    <span class="telem-label">ELEVATOR PWM:</span>
+                    <span class="telem-val" id="val-elev-pwm">1500 us (0%)</span>
+                </div>
+                <div class="pwm-track"><div class="pwm-fill" id="fill-elev-pwm"></div></div>
+            </div>
+
+            <div class="pwm-bar-wrapper">
+                <div class="pwm-label-row">
+                    <span class="telem-label">RUDDER PWM:</span>
+                    <span class="telem-val" id="val-rud-pwm">1500 us (0%)</span>
+                </div>
+                <div class="pwm-track"><div class="pwm-fill" id="fill-rud-pwm"></div></div>
+            </div>
+        </div>
+
+        <!-- Physics Debug Data Panel -->
+        <div id="physics-debug-panel" class="hud-card">
+            <div class="panel-header">PHYSICS DEBUG TELEMETRY</div>
+            <div class="telem-row"><span class="telem-label">BUOYANCY FORCE:</span> <span class="telem-val-highlight" id="phys-buoyancy">+12.3 N</span></div>
+            <div class="telem-row"><span class="telem-label">THRUST FORCE:</span> <span class="telem-val" id="phys-thrust">+0.0 N</span></div>
+            <div class="telem-row"><span class="telem-label">FORWARD DRAG:</span> <span class="telem-val" id="phys-drag">-0.0 N</span></div>
+            <div class="telem-row"><span class="telem-label">DYNAMIC PRESS:</span> <span class="telem-val-highlight" id="phys-qdyn">0.0 Pa</span></div>
+            <div class="telem-row"><span class="telem-label">PITCH MOMENT:</span> <span class="telem-val" id="phys-mpitch">0.00 Nm</span></div>
+            <div class="telem-row"><span class="telem-label">YAW MOMENT:</span> <span class="telem-val" id="phys-nyaw">0.00 Nm</span></div>
+            <div class="telem-row"><span class="telem-label">ROLL MOMENT:</span> <span class="telem-val" id="phys-lroll">0.00 Nm</span></div>
+        </div>
+
+        <!-- Mission Control Panel -->
+        <div id="mission-panel" class="hud-card">
+            <div class="panel-header">MISSION CONTROL</div>
+
+            <div class="mission-row">
+                <span class="telem-label">TARGET DEPTH:</span>
+                <span><input type="number" id="input-depth" step="0.5" value="20.00" class="mission-input"> m</span>
+            </div>
+            <div class="mission-row">
+                <span class="telem-label">TARGET SPEED:</span>
+                <span><input type="number" id="input-speed" step="0.05" value="1.00" class="mission-input"> m/s</span>
+            </div>
+            <div class="mission-row">
+                <span class="telem-label">TARGET HEADING:</span>
+                <span><input type="number" id="input-heading" step="1.0" value="90.0" class="mission-input"> deg</span>
+            </div>
+            <div class="mission-row">
+                <span class="telem-label">MISSION TIME:</span>
+                <span><input type="number" id="input-duration" step="1" value="30" class="mission-input"> min</span>
+            </div>
+
+            <div class="mission-btn-row">
+                <button class="mission-btn btn-start" onclick="startMission()">START MISSION</button>
+                <button class="mission-btn btn-stop" onclick="stopMission()">STOP MISSION</button>
+            </div>
+
+            <div class="mission-status-box">
+                <div class="mission-status-title">MISSION STATUS</div>
+                <div id="txt-mission-status" class="mission-status-val">IDLE</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Compass Widget - Top Right -->
+    <div id="compass-container">
+        <svg id="compass-svg" viewBox="0 0 140 140" width="125" height="125">
+            <!-- Background Outer Ring -->
+            <circle cx="70" cy="70" r="68" fill="rgba(3, 14, 28, 0.94)" stroke="#1c3d5a" stroke-width="2" />
+            <circle cx="70" cy="70" r="66" fill="none" stroke="#00a8e8" stroke-width="1" opacity="0.6" />
+
+            <!-- Rotating Compass Dial Group -->
+            <g id="compass-dial" style="transform-origin: 70px 70px;">
+                <!-- Degree Ticks & Numbers -->
+                <!-- 0 N -->
+                <line x1="70" y1="4" x2="70" y2="12" stroke="#d90429" stroke-width="2" />
+                <text x="70" y="24" fill="#d90429" font-size="13" font-weight="bold" font-family="'Share Tech Mono', monospace" text-anchor="middle">N</text>
+                
+                <!-- 30 -->
+                <line x1="103" y1="13" x2="99" y2="20" stroke="#ffffff" stroke-width="1.2" />
+                <text x="96" y="29" fill="#ffffff" font-size="8" font-family="'Share Tech Mono', monospace" text-anchor="middle">30</text>
+                
+                <!-- 60 -->
+                <line x1="127" y1="37" x2="120" y2="41" stroke="#ffffff" stroke-width="1.2" />
+                <text x="115" y="47" fill="#ffffff" font-size="8" font-family="'Share Tech Mono', monospace" text-anchor="middle">60</text>
+
+                <!-- 90 E -->
+                <line x1="136" y1="70" x2="128" y2="70" stroke="#00f5d4" stroke-width="2" />
+                <text x="122" y="74" fill="#00f5d4" font-size="12" font-weight="bold" font-family="'Share Tech Mono', monospace" text-anchor="middle">E</text>
+                <text x="108" y="73" fill="#ffffff" font-size="7.5" font-family="'Share Tech Mono', monospace" text-anchor="middle">90</text>
+
+                <!-- 120 -->
+                <line x1="127" y1="103" x2="120" y2="99" stroke="#ffffff" stroke-width="1.2" />
+                <text x="115" y="99" fill="#ffffff" font-size="8" font-family="'Share Tech Mono', monospace" text-anchor="middle">120</text>
+
+                <!-- 150 -->
+                <line x1="103" y1="127" x2="99" y2="120" stroke="#ffffff" stroke-width="1.2" />
+                <text x="96" y="117" fill="#ffffff" font-size="8" font-family="'Share Tech Mono', monospace" text-anchor="middle">150</text>
+
+                <!-- 180 S -->
+                <line x1="70" y1="136" x2="70" y2="128" stroke="#00f5d4" stroke-width="2" />
+                <text x="70" y="122" fill="#00f5d4" font-size="12" font-weight="bold" font-family="'Share Tech Mono', monospace" text-anchor="middle">S</text>
+                <text x="70" y="108" fill="#ffffff" font-size="7.5" font-family="'Share Tech Mono', monospace" text-anchor="middle">180</text>
+
+                <!-- 210 -->
+                <line x1="37" y1="127" x2="41" y2="120" stroke="#ffffff" stroke-width="1.2" />
+                <text x="44" y="117" fill="#ffffff" font-size="8" font-family="'Share Tech Mono', monospace" text-anchor="middle">210</text>
+
+                <!-- 240 -->
+                <line x1="13" y1="103" x2="20" y2="99" stroke="#ffffff" stroke-width="1.2" />
+                <text x="25" y="99" fill="#ffffff" font-size="8" font-family="'Share Tech Mono', monospace" text-anchor="middle">240</text>
+
+                <!-- 270 W -->
+                <line x1="4" y1="70" x2="12" y2="70" stroke="#00f5d4" stroke-width="2" />
+                <text x="18" y="74" fill="#00f5d4" font-size="12" font-weight="bold" font-family="'Share Tech Mono', monospace" text-anchor="middle">W</text>
+                <text x="32" y="73" fill="#ffffff" font-size="7.5" font-family="'Share Tech Mono', monospace" text-anchor="middle">270</text>
+
+                <!-- 300 -->
+                <line x1="13" y1="37" x2="20" y2="41" stroke="#ffffff" stroke-width="1.2" />
+                <text x="25" y="47" fill="#ffffff" font-size="8" font-family="'Share Tech Mono', monospace" text-anchor="middle">300</text>
+
+                <!-- 330 -->
+                <line x1="37" y1="13" x2="41" y2="20" stroke="#ffffff" stroke-width="1.2" />
+                <text x="44" y="29" fill="#ffffff" font-size="8" font-family="'Share Tech Mono', monospace" text-anchor="middle">330</text>
+
+                <!-- Intermediate 10-deg tick marks -->
+                <!-- 10 --> <line x1="81" y1="5" x2="80" y2="9" stroke="#8d99ae" stroke-width="1" />
+                <!-- 20 --> <line x1="93" y1="9" x2="91" y2="13" stroke="#8d99ae" stroke-width="1" />
+                <!-- 40 --> <line x1="112" y1="21" x2="109" y2="24" stroke="#8d99ae" stroke-width="1" />
+                <!-- 50 --> <line x1="121" y1="28" x2="117" y2="32" stroke="#8d99ae" stroke-width="1" />
+                <!-- 70 --> <line x1="132" y1="47" x2="128" y2="49" stroke="#8d99ae" stroke-width="1" />
+                <!-- 80 --> <line x1="135" y1="59" x2="131" y2="60" stroke="#8d99ae" stroke-width="1" />
+                <!-- 100 --> <line x1="135" y1="81" x2="131" y2="80" stroke="#8d99ae" stroke-width="1" />
+                <!-- 110 --> <line x1="132" y1="93" x2="128" y2="91" stroke="#8d99ae" stroke-width="1" />
+                <!-- 130 --> <line x1="121" y1="112" x2="117" y2="108" stroke="#8d99ae" stroke-width="1" />
+                <!-- 140 --> <line x1="112" y1="119" x2="109" y2="116" stroke="#8d99ae" stroke-width="1" />
+                <!-- 160 --> <line x1="93" y1="131" x2="91" y2="127" stroke="#8d99ae" stroke-width="1" />
+                <!-- 170 --> <line x1="81" y1="135" x2="80" y2="131" stroke="#8d99ae" stroke-width="1" />
+                <!-- 190 --> <line x1="59" y1="135" x2="60" y2="131" stroke="#8d99ae" stroke-width="1" />
+                <!-- 200 --> <line x1="47" y1="131" x2="49" y2="127" stroke="#8d99ae" stroke-width="1" />
+                <!-- 220 --> <line x1="28" y1="119" x2="31" y2="116" stroke="#8d99ae" stroke-width="1" />
+                <!-- 230 --> <line x1="19" y1="112" x2="23" y2="108" stroke="#8d99ae" stroke-width="1" />
+                <!-- 250 --> <line x1="8" y1="93" x2="12" y2="91" stroke="#8d99ae" stroke-width="1" />
+                <!-- 260 --> <line x1="5" y1="81" x2="9" y2="80" stroke="#8d99ae" stroke-width="1" />
+                <!-- 280 --> <line x1="5" y1="59" x2="9" y2="60" stroke="#8d99ae" stroke-width="1" />
+                <!-- 290 --> <line x1="8" y1="47" x2="12" y2="49" stroke="#8d99ae" stroke-width="1" />
+                <!-- 310 --> <line x1="19" y1="28" x2="23" y2="32" stroke="#8d99ae" stroke-width="1" />
+                <!-- 320 --> <line x1="28" y1="21" x2="31" y2="24" stroke="#8d99ae" stroke-width="1" />
+                <!-- 340 --> <line x1="47" y1="9" x2="49" y2="13" stroke="#8d99ae" stroke-width="1" />
+                <!-- 350 --> <line x1="59" y1="5" x2="60" y2="9" stroke="#8d99ae" stroke-width="1" />
+            </g>
+
+            <!-- Fixed Center Display -->
+            <circle cx="70" cy="70" r="21" fill="#030e1c" stroke="#00a8e8" stroke-width="1.5" />
+            <text id="compass-val" x="70" y="69" fill="#ffffff" font-size="11.5" font-weight="bold" font-family="'Share Tech Mono', monospace" text-anchor="middle">000°</text>
+            <text x="70" y="79" fill="#8d99ae" font-size="7" font-weight="bold" font-family="'Share Tech Mono', monospace" text-anchor="middle">HDG</text>
+
+            <!-- Fixed Top Needle Pointer -->
+            <polygon points="70,11 66,3 74,3" fill="#d90429" />
+            <circle cx="70" cy="70" r="2" fill="#00f5d4" />
+        </svg>
+    </div>
+
+    <!-- Right Sidebar (Bottom Right) -->
+    <div id="right-sidebar">
+        <!-- Mission & Control Telemetry Panel -->
+        <div id="unified-telemetry-panel" class="hud-card">
+            <div class="panel-header">MISSION & CONTROL TELEMETRY</div>
+
+            <div class="hud-section-header">MISSION</div>
+            <div class="telem-row"><span class="telem-label">PHASE:</span> <span class="telem-val-highlight" id="ut-phase">IDLE</span></div>
+            <div class="telem-row"><span class="telem-label">MISSION TIME:</span> <span class="telem-val" id="ut-time">00:00 / 30:00</span></div>
+
+            <div class="hud-divider-line"></div>
+
+            <div class="hud-section-header">DEPTH</div>
+            <div class="telem-row"><span class="telem-label">TARGET:</span> <span class="telem-val" id="ut-depth-tgt">0.00 m</span></div>
+            <div class="telem-row"><span class="telem-label">CURRENT:</span> <span class="telem-val" id="ut-depth-cur">0.50 m</span></div>
+            <div class="telem-row"><span class="telem-label">ERROR:</span> <span class="telem-val-highlight" id="ut-depth-err">+0.00 m</span></div>
+            <div class="telem-row"><span class="telem-label">PID OUTPUT:</span> <span class="telem-val" id="ut-depth-out">+0.0</span></div>
+
+            <div class="hud-divider-line"></div>
+
+            <div class="hud-section-header">HEADING</div>
+            <div class="telem-row"><span class="telem-label">TARGET:</span> <span class="telem-val" id="ut-head-tgt">0.0°</span></div>
+            <div class="telem-row"><span class="telem-label">CURRENT:</span> <span class="telem-val" id="ut-head-cur">0.0°</span></div>
+            <div class="telem-row"><span class="telem-label">ERROR:</span> <span class="telem-val-highlight" id="ut-head-err">+0.0°</span></div>
+            <div class="telem-row"><span class="telem-label">PID OUTPUT:</span> <span class="telem-val" id="ut-head-out">+0.0</span></div>
+
+            <div class="hud-divider-line"></div>
+
+            <div class="hud-section-header">SPEED</div>
+            <div class="telem-row"><span class="telem-label">TARGET:</span> <span class="telem-val" id="ut-spd-tgt">0.00 m/s</span></div>
+            <div class="telem-row"><span class="telem-label">COMMAND:</span> <span class="telem-val" id="ut-spd-cmd">0.00 m/s</span></div>
+            <div class="telem-row"><span class="telem-label">ACTUAL:</span> <span class="telem-val-highlight" id="ut-spd-act">0.00 m/s</span></div>
+
+            <div class="hud-divider-line"></div>
+
+            <div class="hud-section-header">ACTUATOR OUTPUT</div>
+            <div class="telem-row"><span class="telem-label">THRUSTER CMD:</span> <span class="telem-val" id="ut-act-thr">1500 us</span></div>
+            <div class="telem-row"><span class="telem-label">ELEVATOR CMD:</span> <span class="telem-val" id="ut-act-elev">1500 us</span></div>
+            <div class="telem-row"><span class="telem-label">RUDDER CMD:</span> <span class="telem-val" id="ut-act-rud">1500 us</span></div>
+
+            <div class="hud-divider-line"></div>
+
+            <div class="hud-section-header">PHYSICAL STATE</div>
+            <div class="telem-row"><span class="telem-label">FORWARD SPEED:</span> <span class="telem-val" id="ut-phys-fwd">0.00 m/s</span></div>
+            <div class="telem-row"><span class="telem-label">VERTICAL SPEED:</span> <span class="telem-val" id="ut-phys-vz">0.00 m/s</span></div>
+            <div class="telem-row"><span class="telem-label">PITCH:</span> <span class="telem-val" id="ut-phys-pitch">0.0°</span></div>
+            <div class="telem-row"><span class="telem-label">YAW:</span> <span class="telem-val" id="ut-phys-yaw">0.0°</span></div>
+            <div class="telem-row"><span class="telem-label">ROLL:</span> <span class="telem-val" id="ut-phys-roll">0.0°</span></div>
+            <div class="telem-row"><span class="telem-label">DEPTH:</span> <span class="telem-val" id="ut-phys-depth">0.50 m</span></div>
+        </div>
+
+        <!-- Camera Controls (Right Bottom) -->
+        <div id="cam-mode-box">
+            <button class="cam-btn" onclick="setCameraMode('orbit')">Free Orbit</button>
+            <button class="cam-btn" onclick="setCameraMode('follow')">Follow AUV</button>
+            <button class="cam-btn" onclick="setCameraMode('top')">Top View</button>
+            <button class="cam-btn" onclick="setCameraMode('side')">Side View</button>
+        </div>
     </div>
 
     <script>
@@ -707,6 +869,22 @@ HTML_CONTENT = """<!DOCTYPE html>
         let maxTrajectoryPoints = 600;
         let cameraMode = 'orbit';
         let latestState = null;
+
+        // Actuator Animation References & State
+        let propellerGroup = null;
+        let finTopGroup = null;
+        let finBottomGroup = null;
+        let finRightGroup = null;
+        let finLeftGroup = null;
+
+        let propRotationAngle = 0.0;
+        let currentRudAngle = 0.0;
+        let targetRudAngle = 0.0;
+        let currentElevLAngle = 0.0;
+        let targetElevLAngle = 0.0;
+        let currentElevRAngle = 0.0;
+        let targetElevRAngle = 0.0;
+        let currentThrustNorm = 0.0;
 
         function init3D() {
             const container = document.getElementById('canvas-container');
@@ -728,11 +906,14 @@ HTML_CONTENT = """<!DOCTYPE html>
             controls.dampingFactor = 0.05;
 
             // Lights
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.75);
             scene.add(ambientLight);
-            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.90);
             dirLight.position.set(10, 20, 10);
             scene.add(dirLight);
+            const fillLight = new THREE.DirectionalLight(0x00a8e8, 0.40);
+            fillLight.position.set(-10, -10, -10);
+            scene.add(fillLight);
 
             // Water Surface Plane (Depth Z=0m -> Three.js Y=0)
             const surfaceGeo = new THREE.GridHelper(100, 50, 0x00a8e8, 0x002244);
@@ -745,57 +926,353 @@ HTML_CONTENT = """<!DOCTYPE html>
             trajectoryLine = new THREE.Line(trajectoryGeo, trajectoryMat);
             scene.add(trajectoryLine);
 
-            // Create AUV 3D Model
+            // =========================================================================
+            // Realistic Torpedo-Class Cylindrical AUV 3D Model
+            // Scale: Diameter = ~0.40m (Radius = 0.20m), Total Length = ~1.75m
+            // Coordinate Frame: +X = Forward (Nose), -X = Aft (Thruster),
+            //                   +Y = Up (Dorsal),   -Y = Down (Keel),
+            //                   +Z = Right (Starboard), -Z = Left (Port)
+            // =========================================================================
             auvGroup = new THREE.Group();
 
-            const hullGeo = new THREE.CylinderGeometry(0.2, 0.2, 1.6, 16);
-            hullGeo.rotateZ(Math.PI / 2);
-            const hullMat = new THREE.MeshStandardMaterial({ color: 0xffb703, roughness: 0.3, metalness: 0.2 });
-            auvGroup.add(new THREE.Mesh(hullGeo, hullMat));
+            // Professional Marine Robotics Materials
+            const hullMat = new THREE.MeshStandardMaterial({
+                color: 0x18283b,          // Deep Tactical Navy / Blue-Gray Pressure Hull
+                roughness: 0.35,
+                metalness: 0.70
+            });
 
-            const noseGeo = new THREE.SphereGeometry(0.2, 16, 16, 0, Math.PI * 2, 0, Math.PI / 2);
-            noseGeo.rotateZ(-Math.PI / 2);
-            noseGeo.translate(0.8, 0, 0);
-            const noseMat = new THREE.MeshStandardMaterial({ color: 0x00a8e8 });
-            auvGroup.add(new THREE.Mesh(noseGeo, noseMat));
+            const darkHullMat = new THREE.MeshStandardMaterial({
+                color: 0x0e1724,          // Darkened Modular Structural Sections
+                roughness: 0.40,
+                metalness: 0.75
+            });
 
-            const tailGeo = new THREE.ConeGeometry(0.2, 0.4, 16);
-            tailGeo.rotateZ(Math.PI / 2);
-            tailGeo.translate(-1.0, 0, 0);
-            auvGroup.add(new THREE.Mesh(tailGeo, hullMat));
+            const ringMat = new THREE.MeshStandardMaterial({
+                color: 0x223548,          // Anodized Titanium Joint Collars / Rings
+                roughness: 0.25,
+                metalness: 0.85
+            });
 
-            const finMat = new THREE.MeshStandardMaterial({ color: 0xd90429 });
-            
-            const elevLeftGeo = new THREE.PlaneGeometry(0.3, 0.25);
-            elevLeftGeo.rotateY(Math.PI / 2);
-            elevLeftGeo.translate(-0.6, 0.25, 0);
-            auvGroup.add(new THREE.Mesh(elevLeftGeo, finMat));
+            const finMat = new THREE.MeshStandardMaterial({
+                color: 0x1f2e3d,          // Muted Matte Marine Hydrofoil Composite
+                roughness: 0.40,
+                metalness: 0.55
+            });
 
-            const elevRightGeo = new THREE.PlaneGeometry(0.3, 0.25);
-            elevRightGeo.rotateY(Math.PI / 2);
-            elevRightGeo.translate(-0.6, -0.25, 0);
-            auvGroup.add(new THREE.Mesh(elevRightGeo, finMat));
+            const thrusterDuctMat = new THREE.MeshStandardMaterial({
+                color: 0x0a1118,          // Graphite / Black Ducted Shroud
+                roughness: 0.35,
+                metalness: 0.80
+            });
 
-            const rudTopGeo = new THREE.PlaneGeometry(0.25, 0.3);
-            rudTopGeo.rotateX(Math.PI / 2);
-            rudTopGeo.translate(-0.6, 0, 0.25);
-            auvGroup.add(new THREE.Mesh(rudTopGeo, finMat));
+            const propMat = new THREE.MeshStandardMaterial({
+                color: 0x4a5d6e,          // Metallic Alloy Propeller Hub & Blades
+                roughness: 0.25,
+                metalness: 0.90
+            });
 
-            const rudBottomGeo = new THREE.PlaneGeometry(0.25, 0.3);
-            rudBottomGeo.rotateX(Math.PI / 2);
-            rudBottomGeo.translate(-0.6, 0, -0.25);
-            auvGroup.add(new THREE.Mesh(rudBottomGeo, finMat));
+            const detailMat = new THREE.MeshStandardMaterial({
+                color: 0x2a3d4f,          // Structural Rails, Hardware & Mounts
+                roughness: 0.30,
+                metalness: 0.75
+            });
 
-            // Rear Thruster
-            const thrusterGeo = new THREE.CylinderGeometry(0.08, 0.08, 0.15, 12);
-            thrusterGeo.rotateZ(-Math.PI / 2);
-            thrusterGeo.translate(-0.9, 0, 0);
-            const thrusterMat = new THREE.MeshStandardMaterial({ color: 0x8d99ae });
-            auvGroup.add(new THREE.Mesh(thrusterGeo, thrusterMat));
+            const sensorLensMat = new THREE.MeshStandardMaterial({
+                color: 0x00f5d4,          // Optical Sensor Lens with Cyan Glow
+                emissive: 0x00a8e8,
+                emissiveIntensity: 0.4,
+                roughness: 0.15,
+                metalness: 0.9
+            });
 
-            // Heading Vector Indicator (Cyan Arrow)
-            const arrowHelper = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), new THREE.Vector3(1.0, 0, 0), 0.8, 0x00f5d4, 0.2, 0.1);
-            auvGroup.add(arrowHelper);
+            const glassMat = new THREE.MeshStandardMaterial({
+                color: 0x030a14,          // Optical Glass Dome Port
+                roughness: 0.1,
+                metalness: 0.95
+            });
+
+            // 1. Main Pressure Hull Segments (Diameter = ~0.40m -> Radius = 0.20m)
+            // Mid Section (X = [-0.25, +0.25], length = 0.50m)
+            const midHullGeo = new THREE.CylinderGeometry(0.20, 0.20, 0.50, 36);
+            midHullGeo.rotateZ(-Math.PI / 2);
+            const midHull = new THREE.Mesh(midHullGeo, hullMat);
+            midHull.position.set(0, 0, 0);
+            auvGroup.add(midHull);
+
+            // Fore Section (X = [+0.25, +0.50], length = 0.25m)
+            const foreHullGeo = new THREE.CylinderGeometry(0.20, 0.20, 0.25, 36);
+            foreHullGeo.rotateZ(-Math.PI / 2);
+            const foreHull = new THREE.Mesh(foreHullGeo, darkHullMat);
+            foreHull.position.set(0.375, 0, 0);
+            auvGroup.add(foreHull);
+
+            // Aft Section (X = [-0.50, -0.25], length = 0.25m)
+            const aftHullGeo = new THREE.CylinderGeometry(0.20, 0.20, 0.25, 36);
+            aftHullGeo.rotateZ(-Math.PI / 2);
+            const aftHull = new THREE.Mesh(aftHullGeo, darkHullMat);
+            aftHull.position.set(-0.375, 0, 0);
+            auvGroup.add(aftHull);
+
+            // 2. Precision Joint Rings / Modular Collars
+            const ringGeo = new THREE.TorusGeometry(0.202, 0.006, 8, 36);
+            ringGeo.rotateY(Math.PI / 2);
+
+            const ringPositions = [0.50, 0.25, -0.25, -0.50];
+            ringPositions.forEach(posX => {
+                const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+                ringMesh.position.set(posX, 0, 0);
+                auvGroup.add(ringMesh);
+            });
+
+            // 3. Streamlined Nose Cone & Optical Dome
+            // Nose Transition Cone (X = [+0.50, +0.72], length = 0.22m, tapering R: 0.20 -> 0.12)
+            const noseConeGeo = new THREE.CylinderGeometry(0.12, 0.20, 0.22, 36);
+            noseConeGeo.rotateZ(-Math.PI / 2);
+            const noseCone = new THREE.Mesh(noseConeGeo, hullMat);
+            noseCone.position.set(0.61, 0, 0);
+            auvGroup.add(noseCone);
+
+            // Forward Optical Dome (X = [+0.72, +0.84], Radius = 0.12m)
+            const noseDomeGeo = new THREE.SphereGeometry(0.12, 28, 20, 0, Math.PI * 2, 0, Math.PI / 2);
+            noseDomeGeo.rotateZ(-Math.PI / 2);
+            const noseDome = new THREE.Mesh(noseDomeGeo, glassMat);
+            noseDome.position.set(0.72, 0, 0);
+            auvGroup.add(noseDome);
+
+            // Forward Camera Sensor Lens Eye
+            const lensGeo = new THREE.CylinderGeometry(0.04, 0.04, 0.02, 24);
+            lensGeo.rotateZ(-Math.PI / 2);
+            const lensMesh = new THREE.Mesh(lensGeo, sensorLensMat);
+            lensMesh.position.set(0.835, 0, 0);
+            auvGroup.add(lensMesh);
+
+            // Twin LED Inspection Illuminators
+            const lightHousingGeo = new THREE.CylinderGeometry(0.022, 0.022, 0.035, 20);
+            lightHousingGeo.rotateZ(-Math.PI / 2);
+            const lightLensGeo = new THREE.CircleGeometry(0.018, 20);
+            lightLensGeo.rotateY(Math.PI / 2);
+
+            [-0.13, 0.13].forEach(posZ => {
+                const lightHousing = new THREE.Mesh(lightHousingGeo, detailMat);
+                lightHousing.position.set(0.66, 0.04, posZ);
+                auvGroup.add(lightHousing);
+
+                const lightLens = new THREE.Mesh(lightLensGeo, sensorLensMat);
+                lightLens.position.set(0.678, 0.04, posZ);
+                auvGroup.add(lightLens);
+            });
+
+            // 4. Aft Boat-tail Transition (X = [-0.78, -0.50], length = 0.28m, tapering R: 0.20 -> 0.10)
+            const boatTailGeo = new THREE.CylinderGeometry(0.20, 0.10, 0.28, 36);
+            boatTailGeo.rotateZ(-Math.PI / 2);
+            const boatTail = new THREE.Mesh(boatTailGeo, hullMat);
+            boatTail.position.set(-0.64, 0, 0);
+            auvGroup.add(boatTail);
+
+            // 5. Four Symmetrical Control Fins (Cruciform Aft Empennage: Top, Bottom, Right, Left)
+            // Vertical Rudder Geometry (Top & Bottom)
+            const vFinShape = new THREE.Shape();
+            vFinShape.moveTo(-0.12, 0);     // Root Aft
+            vFinShape.lineTo(0.12, 0);      // Root Fore
+            vFinShape.lineTo(0.05, 0.22);   // Tip Fore (Swept Back)
+            vFinShape.lineTo(-0.07, 0.22);  // Tip Aft
+            vFinShape.closePath();
+
+            const finExtrudeSettings = {
+                depth: 0.018,
+                bevelEnabled: true,
+                bevelSegments: 2,
+                steps: 1,
+                bevelSize: 0.003,
+                bevelThickness: 0.003
+            };
+
+            const vFinGeo = new THREE.ExtrudeGeometry(vFinShape, finExtrudeSettings);
+            vFinGeo.translate(0, 0, -0.009); // Center on thickness axis
+
+            // Top Rudder Fin Group (Hinge at X = -0.65, Y = 0.18)
+            finTopGroup = new THREE.Group();
+            finTopGroup.position.set(-0.65, 0.18, 0);
+            const finTopMesh = new THREE.Mesh(vFinGeo, finMat);
+            finTopGroup.add(finTopMesh);
+            auvGroup.add(finTopGroup);
+
+            // Bottom Rudder Fin Group (Hinge at X = -0.65, Y = -0.18)
+            finBottomGroup = new THREE.Group();
+            finBottomGroup.position.set(-0.65, -0.18, 0);
+            const finBottomMesh = new THREE.Mesh(vFinGeo, finMat);
+            finBottomMesh.rotation.z = Math.PI; // Symmetrical downward extension
+            finBottomGroup.add(finBottomMesh);
+            auvGroup.add(finBottomGroup);
+
+            // Horizontal Elevator Geometry (Right & Left)
+            // Dimensions matching rudder: Root Chord = 0.24m, Tip Chord = 0.12m, Span = 0.26m
+            const hFinShape = new THREE.Shape();
+            hFinShape.moveTo(-0.12, 0);     // Root Aft
+            hFinShape.lineTo(0.12, 0);      // Root Fore
+            hFinShape.lineTo(0.05, 0.26);   // Tip Fore (Swept Back)
+            hFinShape.lineTo(-0.07, 0.26);  // Tip Aft
+            hFinShape.closePath();
+
+            // Starboard Elevator (extends horizontally outward along +Z)
+            const hFinGeoRight = new THREE.ExtrudeGeometry(hFinShape, finExtrudeSettings);
+            hFinGeoRight.rotateX(Math.PI / 2);   // Rotates shape into horizontal plane: y -> +z (outward along +Z)
+            hFinGeoRight.translate(0, 0.009, 0); // Center on Y thickness axis
+
+            // Starboard Elevator Group (Mounted at outer hull surface X = -0.65, Z = +0.16)
+            finRightGroup = new THREE.Group();
+            finRightGroup.position.set(-0.65, 0, 0.16);
+            const finRightMesh = new THREE.Mesh(hFinGeoRight, finMat);
+            finRightGroup.add(finRightMesh);
+            auvGroup.add(finRightGroup);
+
+            // Port Elevator (extends horizontally outward along -Z)
+            const hFinGeoLeft = new THREE.ExtrudeGeometry(hFinShape, finExtrudeSettings);
+            hFinGeoLeft.rotateX(-Math.PI / 2);  // Rotates shape into horizontal plane: y -> -z (outward along -Z)
+            hFinGeoLeft.translate(0, -0.009, 0); // Center on Y thickness axis
+
+            // Port Elevator Group (Mounted at outer hull surface X = -0.65, Z = -0.16)
+            finLeftGroup = new THREE.Group();
+            finLeftGroup.position.set(-0.65, 0, -0.16);
+            const finLeftMesh = new THREE.Mesh(hFinGeoLeft, finMat);
+            finLeftGroup.add(finLeftMesh);
+            auvGroup.add(finLeftGroup);
+
+            // 6. Rear Ducted Propulsion System & Rotating Propeller
+            // Circular Kort Nozzle Thruster Duct Shroud
+            const ductOuterGeo = new THREE.CylinderGeometry(0.125, 0.135, 0.15, 32, 1, true);
+            ductOuterGeo.rotateZ(-Math.PI / 2);
+            const ductOuter = new THREE.Mesh(ductOuterGeo, thrusterDuctMat);
+            ductOuter.position.set(-0.88, 0, 0);
+            auvGroup.add(ductOuter);
+
+            const ductInnerGeo = new THREE.CylinderGeometry(0.112, 0.122, 0.15, 32, 1, true);
+            ductInnerGeo.rotateZ(-Math.PI / 2);
+            const ductInnerMat = new THREE.MeshStandardMaterial({ color: 0x080e14, roughness: 0.5, metalness: 0.8, side: THREE.BackSide });
+            const ductInner = new THREE.Mesh(ductInnerGeo, ductInnerMat);
+            ductInner.position.set(-0.88, 0, 0);
+            auvGroup.add(ductInner);
+
+            // Protective Shroud Rims
+            const ductRimGeo = new THREE.TorusGeometry(0.128, 0.006, 8, 32);
+            ductRimGeo.rotateY(Math.PI / 2);
+
+            const ductRimFore = new THREE.Mesh(ductRimGeo, ringMat);
+            ductRimFore.position.set(-0.805, 0, 0);
+            auvGroup.add(ductRimFore);
+
+            const ductRimAft = new THREE.Mesh(ductRimGeo, ringMat);
+            ductRimAft.position.set(-0.955, 0, 0);
+            auvGroup.add(ductRimAft);
+
+            // 4 Radial Duct Support Stators
+            const statorGeo = new THREE.BoxGeometry(0.022, 0.075, 0.006);
+            statorGeo.translate(0, 0.075, 0);
+            for (let i = 0; i < 4; i++) {
+                const angle = (i * Math.PI) / 2 + Math.PI / 4;
+                const stator = new THREE.Mesh(statorGeo, detailMat);
+                stator.position.set(-0.83, 0, 0);
+                stator.rotation.x = angle;
+                auvGroup.add(stator);
+            }
+
+            // Rotating Propeller Group
+            propellerGroup = new THREE.Group();
+            propellerGroup.position.set(-0.88, 0, 0);
+
+            // Central Propeller Hub Spinner
+            const hubGeo = new THREE.ConeGeometry(0.035, 0.12, 20);
+            hubGeo.rotateZ(Math.PI / 2); // Cone apex points aft (-X)
+            const hubMesh = new THREE.Mesh(hubGeo, propMat);
+            hubMesh.position.set(-0.02, 0, 0);
+            propellerGroup.add(hubMesh);
+
+            // 4 Propeller Blades
+            const bladeGeo = new THREE.BoxGeometry(0.006, 0.065, 0.022);
+            bladeGeo.translate(0, 0.040, 0);
+            for (let i = 0; i < 4; i++) {
+                const angle = (i * Math.PI) / 2;
+                const blade = new THREE.Mesh(bladeGeo, propMat);
+                blade.rotation.x = angle;
+                blade.rotation.y = 0.38; // Blade pitch angle
+                propellerGroup.add(blade);
+            }
+            auvGroup.add(propellerGroup);
+
+            // 7. Sensor Details, Mounting Rails & Deck Features
+            // Side Protection / Guide Rails
+            const railGeo = new THREE.BoxGeometry(0.75, 0.018, 0.010);
+            [-0.202, 0.202].forEach(posZ => {
+                const rail = new THREE.Mesh(railGeo, detailMat);
+                rail.position.set(0.02, 0, posZ);
+                auvGroup.add(rail);
+            });
+
+            // Bottom DVL 4-Transducer Acoustic Array
+            const dvlBaseGeo = new THREE.CylinderGeometry(0.06, 0.06, 0.015, 24);
+            const dvlBase = new THREE.Mesh(dvlBaseGeo, detailMat);
+            dvlBase.position.set(0.12, -0.198, 0);
+            auvGroup.add(dvlBase);
+
+            const transducerGeo = new THREE.CircleGeometry(0.016, 16);
+            transducerGeo.rotateX(Math.PI / 2);
+            const dvlTransducerMat = new THREE.MeshStandardMaterial({ color: 0x050c14, roughness: 0.2, metalness: 0.9 });
+
+            [[-0.024, -0.024], [0.024, -0.024], [-0.024, 0.024], [0.024, 0.024]].forEach(([dx, dz]) => {
+                const transducer = new THREE.Mesh(transducerGeo, dvlTransducerMat);
+                transducer.position.set(0.12 + dx, -0.206, dz);
+                auvGroup.add(transducer);
+            });
+
+            // Top Navigation Antenna / Strobe Mast
+            const mastShape = new THREE.Shape();
+            mastShape.moveTo(-0.06, 0);
+            mastShape.lineTo(0.06, 0);
+            mastShape.lineTo(0.03, 0.05);
+            mastShape.lineTo(-0.04, 0.05);
+            mastShape.closePath();
+
+            const mastGeo = new THREE.ExtrudeGeometry(mastShape, { depth: 0.014, bevelEnabled: true, bevelSize: 0.002, bevelThickness: 0.002 });
+            mastGeo.translate(0, 0, -0.007);
+            const mast = new THREE.Mesh(mastGeo, detailMat);
+            mast.position.set(-0.15, 0.198, 0);
+            auvGroup.add(mast);
+
+            // Top Strobe Beacon LED
+            const beaconGeo = new THREE.SphereGeometry(0.008, 12, 12);
+            const beacon = new THREE.Mesh(beaconGeo, sensorLensMat);
+            beacon.position.set(-0.15, 0.252, 0);
+            auvGroup.add(beacon);
+
+            // Side Transducer Ports (Port & Starboard)
+            const sidePortGeo = new THREE.RingGeometry(0.014, 0.028, 20);
+            const sidePortMat = new THREE.MeshStandardMaterial({ color: 0x223548, roughness: 0.3, metalness: 0.8, side: THREE.DoubleSide });
+
+            [-0.201, 0.201].forEach(posZ => {
+                const sidePort = new THREE.Mesh(sidePortGeo, sidePortMat);
+                sidePort.position.set(0.42, -0.03, posZ);
+                sidePort.rotation.y = posZ > 0 ? 0 : Math.PI;
+                auvGroup.add(sidePort);
+            });
+
+            // 8. 3-Axis Body Frame Orientation Indicator (X=Forward, Y=Right/Starboard, Z=Down)
+            const axisOrigin = new THREE.Vector3(0.85, 0, 0);
+
+            // X-Axis: Forward (Bright Cyan)
+            const dirX = new THREE.Vector3(1, 0, 0);
+            const arrowX = new THREE.ArrowHelper(dirX, axisOrigin, 0.65, 0x00f5d4, 0.16, 0.07);
+            auvGroup.add(arrowX);
+
+            // Y-Axis: Right / Starboard (Aqua Sky)
+            const dirY = new THREE.Vector3(0, 0, 1);
+            const arrowY = new THREE.ArrowHelper(dirY, axisOrigin, 0.45, 0x48cae4, 0.12, 0.06);
+            auvGroup.add(arrowY);
+
+            // Z-Axis: Down (Tactical Blue-Cyan)
+            const dirZ = new THREE.Vector3(0, -1, 0);
+            const arrowZ = new THREE.ArrowHelper(dirZ, axisOrigin, 0.45, 0x00a8e8, 0.12, 0.06);
+            auvGroup.add(arrowZ);
 
             scene.add(auvGroup);
 
@@ -873,100 +1350,78 @@ HTML_CONTENT = """<!DOCTYPE html>
                 statusBadge.style.color = '#52b788';
                 statusBadge.style.borderColor = '#52b788';
             } else {
-                statusBadge.style.color = '#8d99ae';
-                statusBadge.style.borderColor = '#1c3d5a';
+                statusBadge.style.color = '#00f5d4';
+                statusBadge.style.borderColor = '#00f5d4';
             }
 
-            // Unified Telemetry Panel Updates
-            document.getElementById('ut-phase').innerText = phase;
-
-            const totalDurMin = parseFloat(document.getElementById('input-duration').value) || 30;
-            const elapsedSec = insp.elapsed_time || 0.0;
-
-            const mCurr = Math.floor(elapsedSec / 60);
-            const sCurr = Math.floor(elapsedSec % 60);
-            const mTot = Math.floor(totalDurMin);
-            const sTot = Math.floor((totalDurMin % 1) * 60);
-            const timeStr = `${mCurr < 10 ? '0' : ''}${mCurr}:${sCurr < 10 ? '0' : ''}${sCurr} / ${mTot < 10 ? '0' : ''}${mTot}:${sTot < 10 ? '0' : ''}${sTot}`;
-            
-            document.getElementById('ut-time').innerText = insp.time_str || timeStr;
-
-            // ACTIVE targets — use the actual controller targets from ROS, NOT mission input fields
-            const isDepthHoldActive = (dhStatus && dhStatus !== 'OFF') || phase === 'DESCENDING' || phase === 'INSPECTION' || phase === 'SURFACING';
-            let activeDepthTgt = 0.0;
-            if (dhStatus && dhStatus.startsWith('ON:')) {
-                const parts = dhStatus.split(':');
-                if (parts.length > 1) {
-                    activeDepthTgt = parseFloat(parts[1]);
-                } else {
-                    activeDepthTgt = aut.active_depth_target !== undefined ? aut.active_depth_target : (aut.target_depth || 0.0);
-                }
-            } else if (phase === 'DESCENDING' || phase === 'INSPECTION') {
-                activeDepthTgt = insp.target_depth !== undefined ? insp.target_depth : (aut.active_depth_target !== undefined ? aut.active_depth_target : (aut.target_depth || 20.0));
-            } else if (phase === 'SURFACING' || phase === 'MISSION COMPLETE') {
-                activeDepthTgt = 0.0;
-            } else {
-                activeDepthTgt = aut.active_depth_target !== undefined ? aut.active_depth_target : (aut.target_depth || 0.0);
-            }
-
-            const isHeadingHoldActive = (hhStatus && hhStatus !== 'OFF') || phase === 'DESCENDING' || phase === 'INSPECTION' || phase === 'SURFACING';
-            let activeHeadingTgt = 0.0;
-            if (hhStatus && hhStatus.startsWith('ON:')) {
-                const parts = hhStatus.split(':');
-                if (parts.length > 1) {
-                    activeHeadingTgt = parseFloat(parts[1]);
-                } else {
-                    activeHeadingTgt = aut.active_heading_target !== undefined ? aut.active_heading_target : (aut.target_heading || 0.0);
-                }
-            } else if (phase === 'DESCENDING' || phase === 'INSPECTION') {
-                activeHeadingTgt = insp.target_heading !== undefined ? insp.target_heading : (aut.active_heading_target !== undefined ? aut.active_heading_target : (aut.target_heading || 90.0));
-            } else if (phase === 'SURFACING' || phase === 'MISSION COMPLETE') {
-                activeHeadingTgt = insp.recovery_heading !== undefined ? insp.recovery_heading : 0.0;
-            } else {
-                activeHeadingTgt = aut.active_heading_target !== undefined ? aut.active_heading_target : (aut.target_heading || 0.0);
-            }
-
-            const reqSpd = insp.target_speed !== undefined ? insp.target_speed : (parseFloat(document.getElementById('input-speed').value) || 1.0);
-            const cmdSpd = insp.commanded_speed !== undefined ? insp.commanded_speed : ( (phase === 'DESCENDING' || phase === 'INSPECTION' || phase === 'SURFACING') ? reqSpd : 0.0 );
-            const actSpd = data.velocities ? data.velocities.vx : 0.0;
-
-            // Mode Badges
-            const distStatus = data.status.distance_hold;
-
+            // Mode Badge
             const badgeMode = document.getElementById('badge-mode');
-            if (hhStatus !== 'OFF' || dhStatus !== 'OFF' || distStatus !== 'OFF' || phase !== 'IDLE') {
-                badgeMode.innerText = 'AUTONOMY';
+            if (phase === 'IDLE' || phase === 'DISARMED') {
+                badgeMode.innerText = isArmed ? 'MANUAL' : 'DISARMED';
+                badgeMode.className = 'badge-box';
             } else {
-                badgeMode.innerText = 'MANUAL';
+                badgeMode.innerText = `AUTO: ${phase}`;
+                badgeMode.className = 'badge-box badge-enabled';
             }
 
-            const badgeDH = document.getElementById('badge-depth-hold');
-            if (dhStatus !== 'OFF' || phase === 'DESCENDING' || phase === 'INSPECTION' || phase === 'SURFACING') {
-                badgeDH.className = 'badge-box badge-enabled';
-                badgeDH.innerText = `DEPTH HOLD: ON`;
+            // Top Status Bar Badges
+            const isDepthHoldActive = (dhStatus.startsWith('ON:') || dhStatus === 'ACTIVE');
+            const bDH = document.getElementById('badge-depth-hold');
+            if (isDepthHoldActive) {
+                bDH.className = 'badge-box badge-enabled';
+                bDH.innerText = `DEPTH HOLD: ${dhStatus.replace('ON:', '')}m`;
             } else {
-                badgeDH.className = 'badge-box badge-disabled';
-                badgeDH.innerText = 'DEPTH HOLD: OFF';
+                bDH.className = 'badge-box badge-disabled';
+                bDH.innerText = 'DEPTH HOLD: OFF';
             }
 
-            const badgeHH = document.getElementById('badge-heading-hold');
-            if (hhStatus !== 'OFF' || phase === 'DESCENDING' || phase === 'INSPECTION' || phase === 'SURFACING') {
-                badgeHH.className = 'badge-box badge-enabled';
-                badgeHH.innerText = `HEADING HOLD: ON`;
+            const isHeadingHoldActive = (hhStatus.startsWith('ON:') || hhStatus === 'ACTIVE');
+            const bHH = document.getElementById('badge-heading-hold');
+            if (isHeadingHoldActive) {
+                bHH.className = 'badge-box badge-enabled';
+                bHH.innerText = `HEADING HOLD: ${hhStatus.replace('ON:', '')}\u00b0`;
             } else {
-                badgeHH.className = 'badge-box badge-disabled';
-                badgeHH.innerText = 'HEADING HOLD: OFF';
+                bHH.className = 'badge-box badge-disabled';
+                bHH.innerText = 'HEADING HOLD: OFF';
             }
 
-            // 4. Telemetry Data
+            const rollStabStatus = data.status ? (data.status.roll_stabilizer || 'ACTIVE') : 'ACTIVE';
+            const bRoll = document.getElementById('badge-roll-stab');
+            if (rollStabStatus === 'ACTIVE') {
+                bRoll.className = 'badge-box badge-enabled';
+                bRoll.innerText = 'ROLL STABILIZER: ACTIVE';
+            } else {
+                bRoll.className = 'badge-box badge-disabled';
+                bRoll.innerText = 'ROLL STABILIZER: OFF';
+            }
+
+            // Mission inputs from autonomy state if active
+            const activeDepthTgt = aut.active_depth_target !== undefined ? aut.active_depth_target : (aut.target_depth || 0.0);
+            const activeHeadingTgt = aut.active_heading_target !== undefined ? aut.active_heading_target : (aut.target_heading || 0.0);
+            const reqSpd = insp.target_speed || aut.throttle_cmd || 0.0;
+            const cmdSpd = aut.throttle_cmd || 0.0;
+            const actSpd = data.velocities ? (data.velocities.vx || 0.0) : 0.0;
+
+            // 4. Left Telemetry Data Panel
             const orient = data.orientation || { roll: 0.0, pitch: 0.0, yaw: 0.0 };
             const roll = orient.roll || 0.0;
             const pitch = orient.pitch || 0.0;
             const yaw = orient.yaw || 0.0;
 
-            document.getElementById('val-roll').innerText = `${roll >= 0 ? '+' : ''}${roll.toFixed(1)}°`;
-            document.getElementById('val-pitch').innerText = `${pitch >= 0 ? '+' : ''}${pitch.toFixed(1)}°`;
-            document.getElementById('val-yaw').innerText = `${yaw >= 0 ? '+' : ''}${yaw.toFixed(1)}°`;
+            document.getElementById('val-roll').innerText = `${roll >= 0 ? '+' : ''}${roll.toFixed(1)}\u00b0`;
+            document.getElementById('val-pitch').innerText = `${pitch >= 0 ? '+' : ''}${pitch.toFixed(1)}\u00b0`;
+            document.getElementById('val-yaw').innerText = `${yaw >= 0 ? '+' : ''}${yaw.toFixed(1)}\u00b0`;
+
+            // Compass Dial & Digital Heading Display
+            const compassDial = document.getElementById('compass-dial');
+            if (compassDial) {
+                compassDial.style.transform = `rotate(${-yaw}deg)`;
+            }
+            const compassVal = document.getElementById('compass-val');
+            if (compassVal) {
+                const normHdg = ((Math.round(yaw) % 360) + 360) % 360;
+                compassVal.textContent = `${normHdg.toString().padStart(3, '0')}°`;
+            }
 
             const vels = data.velocities || { vx: 0.0, vy: 0.0, vz: 0.0 };
             const vx = vels.vx || 0.0;
@@ -990,7 +1445,7 @@ HTML_CONTENT = """<!DOCTYPE html>
             document.getElementById('txt-packets').innerText = `${data.packets || 0} pkts`;
             document.getElementById('val-motion').innerText = data.world_motion || 'NONE';
 
-            // 5. Unified Telemetry Panel — Active Targets from Controllers
+            // 5. Unified Telemetry Panel — Active Targets
             const curDepth = depth;
             const depthErr = isDepthHoldActive ? (activeDepthTgt - curDepth) : 0.0;
             const depthCmd = aut.depth_cmd || 0.0;
@@ -1002,10 +1457,44 @@ HTML_CONTENT = """<!DOCTYPE html>
             if (!isHeadingHoldActive) headErr = 0.0;
             const rudCmd = aut.rudder_cmd || 0.0;
 
-            const acts = data.actuators || { main_thruster: 1500, elevator_left: 1500, rudder_left: 1500 };
+            const acts = data.actual_actuators || data.actuators || { main_thruster: 1500, elevator_left: 1500, elevator_right: 1500, rudder_left: 1500, rudder_right: 1500 };
             const thrPWM = acts.main_thruster !== undefined ? acts.main_thruster : 1500;
-            const elevPWM = acts.elevator_left !== undefined ? acts.elevator_left : 1500;
-            const rudPWM = acts.rudder_left !== undefined ? acts.rudder_left : 1500;
+            const elevLPWM = acts.elevator_left !== undefined ? acts.elevator_left : 1500;
+            const elevRPWM = acts.elevator_right !== undefined ? acts.elevator_right : elevLPWM;
+            const rudLPWM = acts.rudder_left !== undefined ? acts.rudder_left : 1500;
+            const rudRPWM = acts.rudder_right !== undefined ? acts.rudder_right : rudLPWM;
+
+            // Actuator Target Deflections & Thrust
+            currentThrustNorm = (thrPWM - 1500) / 400.0;
+
+            const el_l_norm = (elevLPWM - 1500) / 400.0;
+            const el_r_norm = (elevRPWM - 1500) / 400.0;
+
+            // Decompose into common pitch component and differential roll component
+            const pitch_component = (el_l_norm - el_r_norm) / 2.0;
+            const roll_component = (el_l_norm + el_r_norm) / 2.0;
+
+            const maxFinAngle = 0.436; // 25 degrees in radians
+            const pitch_deflection = pitch_component * maxFinAngle;
+            const roll_deflection = roll_component * maxFinAngle;
+
+            // Normal Pitch: Left = Right (matched pair)
+            // Roll Stabilizer: Left = -Right (differential pair)
+            targetElevLAngle = pitch_deflection + roll_deflection;
+            targetElevRAngle = pitch_deflection - roll_deflection;
+
+            targetRudAngle = ((rudLPWM - 1500) / 400.0) * maxFinAngle;
+
+            // Mission section
+            document.getElementById('ut-phase').innerText = phase;
+            const mElapsed = insp.elapsed_time || 0;
+            const mTotal = (insp.duration_min || 30) * 60;
+            const fmtTime = (sec) => {
+                const m = Math.floor(sec / 60).toString().padStart(2, '0');
+                const s = Math.floor(sec % 60).toString().padStart(2, '0');
+                return `${m}:${s}`;
+            };
+            document.getElementById('ut-time').innerText = `${fmtTime(mElapsed)} / ${fmtTime(mTotal)}`;
 
             // Depth section
             document.getElementById('ut-depth-tgt').innerText = `${activeDepthTgt.toFixed(2)} m`;
@@ -1026,8 +1515,8 @@ HTML_CONTENT = """<!DOCTYPE html>
 
             // Actuator section
             document.getElementById('ut-act-thr').innerText = `${thrPWM} us`;
-            document.getElementById('ut-act-elev').innerText = `${elevPWM} us`;
-            document.getElementById('ut-act-rud').innerText = `${rudPWM} us`;
+            document.getElementById('ut-act-elev').innerText = `${elevLPWM} us`;
+            document.getElementById('ut-act-rud').innerText = `${rudLPWM} us`;
 
             // Physical state section
             document.getElementById('ut-phys-fwd').innerText = `${vx.toFixed(2)} m/s`;
@@ -1057,17 +1546,17 @@ HTML_CONTENT = """<!DOCTYPE html>
 
             // Actuator PWM Bars
             const thrPct = Math.round(((thrPWM - 1500) / 400) * 100);
-            const elevPct = Math.round(((elevPWM - 1500) / 400) * 100);
-            const rudPct = Math.round(((rudPWM - 1500) / 400) * 100);
+            const elevPct = Math.round(((elevLPWM - 1500) / 400) * 100);
+            const rudPct = Math.round(((rudLPWM - 1500) / 400) * 100);
 
             document.getElementById('val-thr-pwm').innerText = `${thrPWM} us (${thrPct >= 0 ? '+' : ''}${thrPct}%)`;
             document.getElementById('fill-thr-pwm').style.width = `${((thrPWM - 1100) / 800) * 100}%`;
 
-            document.getElementById('val-elev-pwm').innerText = `${elevPWM} us (${elevPct >= 0 ? '+' : ''}${elevPct}%)`;
-            document.getElementById('fill-elev-pwm').style.width = `${((elevPWM - 1100) / 800) * 100}%`;
+            document.getElementById('val-elev-pwm').innerText = `${elevLPWM} us (${elevPct >= 0 ? '+' : ''}${elevPct}%)`;
+            document.getElementById('fill-elev-pwm').style.width = `${((elevLPWM - 1100) / 800) * 100}%`;
 
-            document.getElementById('val-rud-pwm').innerText = `${rudPWM} us (${rudPct >= 0 ? '+' : ''}${rudPct}%)`;
-            document.getElementById('fill-rud-pwm').style.width = `${((rudPWM - 1100) / 800) * 100}%`;
+            document.getElementById('val-rud-pwm').innerText = `${rudLPWM} us (${rudPct >= 0 ? '+' : ''}${rudPct}%)`;
+            document.getElementById('fill-rud-pwm').style.width = `${((rudLPWM - 1100) / 800) * 100}%`;
 
             // 7. Update 3D AUV Pose in Three.js
             const posX = pos.x !== undefined ? pos.x : 0.0;
@@ -1097,6 +1586,25 @@ HTML_CONTENT = """<!DOCTYPE html>
         function animate() {
             requestAnimationFrame(animate);
             controls.update();
+
+            // 1. Propeller Continuous Visual Rotation based on Thrust
+            if (propellerGroup && Math.abs(currentThrustNorm) > 0.01) {
+                // Rotation speed proportional to normalized thrust
+                propRotationAngle += currentThrustNorm * 0.40;
+                propellerGroup.rotation.x = propRotationAngle;
+            }
+
+            // 2. Smooth Fin Deflection Animation (Lerp to Target Angle)
+            const finLerpFactor = 0.15;
+            currentRudAngle += (targetRudAngle - currentRudAngle) * finLerpFactor;
+            currentElevLAngle += (targetElevLAngle - currentElevLAngle) * finLerpFactor;
+            currentElevRAngle += (targetElevRAngle - currentElevRAngle) * finLerpFactor;
+
+            if (finTopGroup) finTopGroup.rotation.y = currentRudAngle;
+            if (finBottomGroup) finBottomGroup.rotation.y = currentRudAngle;
+            if (finRightGroup) finRightGroup.rotation.z = currentElevRAngle;
+            if (finLeftGroup) finLeftGroup.rotation.z = currentElevLAngle;
+
             renderer.render(scene, camera);
         }
 

@@ -95,38 +95,72 @@ class DepthHold(Node):
             10
         )
 
+        # Subscribe to explicit enable/disable commands for depth hold
+        self.create_subscription(
+            Float32,
+            '/auv/depth_hold_enabled',
+            self.depth_hold_enable_callback,
+            10
+        )
+
         self.get_logger().info(
             'Depth Hold Started'
         )
 
     def desired_depth_callback(self, msg):
-        """Accept external/mission depth target."""
+        """Accept external/mission depth target — updates target only, does NOT enable hold."""
         new_target = float(msg.data)
-        # Avoid re-triggering integral reset if the target is already identical
-        if abs(self.target_depth - new_target) < 1e-4 and self.depth_hold_enabled:
+        if abs(self.target_depth - new_target) < 1e-4:
             return
 
         self.target_depth = new_target
         self.target_source = 'EXTERNAL'
-        self.depth_hold_enabled = True
 
-        self.pid.integral = 0.0
-        self.pid.prev_error = 0.0
-        self.prev_time = self.get_clock().now()
+        # Only reset PID if depth hold is currently active
+        if self.depth_hold_enabled:
+            self.pid.integral = 0.0
+            self.pid.prev_error = 0.0
+            self.prev_time = self.get_clock().now()
 
-        state = Float32()
-        state.data = 1.0
-        self.state_pub.publish(state)
+            # Re-publish active target for HUD since it changed while active
+            active = Float32()
+            active.data = self.target_depth
+            self.active_target_pub.publish(active)
 
-        status = String()
-        status.data = f"ON:{self.target_depth:.2f}"
-        self.status_pub.publish(status)
+            status = String()
+            status.data = f"ON:{self.target_depth:.2f}"
+            self.status_pub.publish(status)
 
-        active = Float32()
-        active.data = self.target_depth
-        self.active_target_pub.publish(active)
+        self.get_logger().info(f'DESIRED DEPTH TARGET UPDATED (EXTERNAL): {self.target_depth:.2f} m (hold_enabled={self.depth_hold_enabled})')
 
-        self.get_logger().info(f'DESIRED DEPTH SET (EXTERNAL): {self.target_depth:.2f} m')
+    def depth_hold_enable_callback(self, msg):
+        """Explicit enable/disable of depth hold from mission or external command."""
+        enable = bool(msg.data)
+        if enable and not self.depth_hold_enabled:
+            self.depth_hold_enabled = True
+            self.target_source = 'EXTERNAL'
+            self.pid.integral = 0.0
+            self.pid.prev_error = 0.0
+            self.prev_time = self.get_clock().now()
+
+            status = String()
+            status.data = f"ON:{self.target_depth:.2f}"
+            self.status_pub.publish(status)
+
+            active = Float32()
+            active.data = self.target_depth
+            self.active_target_pub.publish(active)
+
+            self.get_logger().info(f'DEPTH HOLD ENABLED (EXTERNAL): target={self.target_depth:.2f} m')
+        elif not enable and self.depth_hold_enabled:
+            self.depth_hold_enabled = False
+            self.target_source = 'NONE'
+
+            status = String()
+            status.data = "OFF"
+            self.status_pub.publish(status)
+
+            self.get_logger().info('DEPTH HOLD DISABLED (EXTERNAL)')
 
     def joy_callback(self, msg):
 

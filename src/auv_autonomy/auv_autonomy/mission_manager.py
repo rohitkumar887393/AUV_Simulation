@@ -45,6 +45,8 @@ class MissionManager(Node):
         )
 
     def mission_callback(self, msg):
+        if not msg.start:
+            return
 
         heading = Float32()
         heading.data = msg.heading

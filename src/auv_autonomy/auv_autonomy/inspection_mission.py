@@ -123,17 +123,18 @@ class InspectionMission(Node):
             self.stop_mission()
             return
 
-        if msg.start or msg.depth > 0 or msg.duration > 0:
-            if msg.depth > 0:
-                self.target_depth = float(msg.depth)
-            if msg.heading != 0.0 or msg.depth > 0:
-                self.target_heading = float(msg.heading)
-            if msg.inspection_speed > 0:
-                self.target_speed = float(msg.inspection_speed)
-            if msg.duration > 0:
-                duration_val = float(msg.duration)
-                self.total_mission_duration = duration_val * 60.0 if duration_val <= 120.0 else duration_val
+        if msg.depth > 0:
+            self.target_depth = float(msg.depth)
+        if msg.heading != 0.0 or msg.depth > 0:
+            self.target_heading = float(msg.heading)
+        if msg.inspection_speed > 0:
+            self.target_speed = float(msg.inspection_speed)
+        if msg.duration > 0:
+            duration_val = float(msg.duration)
+            self.total_mission_duration = duration_val * 60.0 if duration_val <= 120.0 else duration_val
 
+        # Only transition from IDLE to DESCENDING (active autonomy) when explicitly commanded to start
+        if msg.start:
             self.start_mission()
 
     def start_mission(self):
@@ -434,4 +435,3 @@ def main(args=None):
 
 if __name__ == '__main__':
     main()
-
