@@ -412,6 +412,7 @@ class InspectionMission(Node):
             "recovery_heading": self.recovery_heading,
             "elapsed_time": self.elapsed_time,
             "total_duration": self.total_mission_duration,
+            "duration_min": self.total_mission_duration / 60.0,
             "time_str": time_str,
             "depth_pid_active": depth_pid_active
         }

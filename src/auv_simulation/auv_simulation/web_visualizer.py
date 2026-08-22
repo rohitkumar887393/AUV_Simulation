@@ -688,7 +688,7 @@ HTML_CONTENT = """<!DOCTYPE html>
             </div>
             <div class="mission-row">
                 <span class="telem-label">MISSION TIME:</span>
-                <span><input type="number" id="input-duration" step="1" value="30" class="mission-input"> min</span>
+                <span><input type="number" id="input-duration" step="1" value="30" class="mission-input" oninput="updateMissionTimeDisplay()"> min</span>
             </div>
 
             <div class="mission-btn-row">
@@ -810,7 +810,7 @@ HTML_CONTENT = """<!DOCTYPE html>
 
             <div class="hud-section-header">MISSION</div>
             <div class="telem-row"><span class="telem-label">PHASE:</span> <span class="telem-val-highlight" id="ut-phase">IDLE</span></div>
-            <div class="telem-row"><span class="telem-label">MISSION TIME:</span> <span class="telem-val" id="ut-time">00:00 / 30:00</span></div>
+            <div class="telem-row"><span class="telem-label">MISSION TIME:</span> <span class="telem-val" id="ut-time">00:00 / 00:00</span></div>
 
             <div class="hud-divider-line"></div>
 
@@ -847,10 +847,6 @@ HTML_CONTENT = """<!DOCTYPE html>
             <div class="hud-section-header">PHYSICAL STATE</div>
             <div class="telem-row"><span class="telem-label">FORWARD SPEED:</span> <span class="telem-val" id="ut-phys-fwd">0.00 m/s</span></div>
             <div class="telem-row"><span class="telem-label">VERTICAL SPEED:</span> <span class="telem-val" id="ut-phys-vz">0.00 m/s</span></div>
-            <div class="telem-row"><span class="telem-label">PITCH:</span> <span class="telem-val" id="ut-phys-pitch">0.0°</span></div>
-            <div class="telem-row"><span class="telem-label">YAW:</span> <span class="telem-val" id="ut-phys-yaw">0.0°</span></div>
-            <div class="telem-row"><span class="telem-label">ROLL:</span> <span class="telem-val" id="ut-phys-roll">0.0°</span></div>
-            <div class="telem-row"><span class="telem-label">DEPTH:</span> <span class="telem-val" id="ut-phys-depth">0.50 m</span></div>
         </div>
 
         <!-- Camera Controls (Right Bottom) -->
@@ -1501,14 +1497,10 @@ HTML_CONTENT = """<!DOCTYPE html>
 
             // Mission section
             document.getElementById('ut-phase').innerText = phase;
-            const mElapsed = insp.elapsed_time || 0;
-            const mTotal = (insp.duration_min || 30) * 60;
-            const fmtTime = (sec) => {
-                const m = Math.floor(sec / 60).toString().padStart(2, '0');
-                const s = Math.floor(sec % 60).toString().padStart(2, '0');
-                return `${m}:${s}`;
-            };
+            const mElapsed = (insp.elapsed_time !== undefined) ? insp.elapsed_time : 0;
+            const mTotal = getAuthoritativeMissionDurationSec(insp, phase);
             document.getElementById('ut-time').innerText = `${fmtTime(mElapsed)} / ${fmtTime(mTotal)}`;
+
 
             // Depth section
             document.getElementById('ut-depth-tgt').innerText = `${activeDepthTgt.toFixed(2)} m`;
@@ -1535,10 +1527,7 @@ HTML_CONTENT = """<!DOCTYPE html>
             // Physical state section
             document.getElementById('ut-phys-fwd').innerText = `${vx.toFixed(2)} m/s`;
             document.getElementById('ut-phys-vz').innerText = `${vz.toFixed(2)} m/s`;
-            document.getElementById('ut-phys-pitch').innerText = `${pitch >= 0 ? '+' : ''}${pitch.toFixed(1)}\u00b0`;
-            document.getElementById('ut-phys-yaw').innerText = `${yaw >= 0 ? '+' : ''}${yaw.toFixed(1)}\u00b0`;
-            document.getElementById('ut-phys-roll').innerText = `${roll >= 0 ? '+' : ''}${roll.toFixed(1)}\u00b0`;
-            document.getElementById('ut-phys-depth').innerText = `${curDepth.toFixed(2)} m`;
+
 
             // 6. Physics Debug Data Panel
             const phys = data.physics || {};
@@ -1748,6 +1737,42 @@ HTML_CONTENT = """<!DOCTYPE html>
             }
         }
 
+        function fmtTime(sec) {
+            const sTotal = Math.max(0, Math.round(sec));
+            const m = Math.floor(sTotal / 60).toString().padStart(2, '0');
+            const s = Math.floor(sTotal % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        function getAuthoritativeMissionDurationSec(insp, phase) {
+            const inputDurElem = document.getElementById('input-duration');
+            const inputMinutes = inputDurElem ? (parseFloat(inputDurElem.value) || 0) : 0;
+            const inputSeconds = inputMinutes * 60;
+
+            if (insp && phase && phase !== 'IDLE' && phase !== 'DISARMED') {
+                if (insp.total_duration !== undefined && insp.total_duration > 0) {
+                    return insp.total_duration;
+                }
+                if (insp.duration_min !== undefined && insp.duration_min > 0) {
+                    return insp.duration_min * 60;
+                }
+            }
+            return inputSeconds;
+        }
+
+        function updateMissionTimeDisplay() {
+            const aut = (latestState && latestState.autonomy) ? latestState.autonomy : {};
+            const insp = aut.inspection_mission || {};
+            const phase = insp.status || (latestState && latestState.status ? latestState.status.mission : 'IDLE') || 'IDLE';
+            const mElapsed = (insp && insp.elapsed_time !== undefined) ? insp.elapsed_time : 0;
+            const mTotal = getAuthoritativeMissionDurationSec(insp, phase);
+            
+            const utTimeElem = document.getElementById('ut-time');
+            if (utTimeElem) {
+                utTimeElem.innerText = `${fmtTime(mElapsed)} / ${fmtTime(mTotal)}`;
+            }
+        }
+
         function startMission() {
             const depth = parseFloat(document.getElementById('input-depth').value) || 20.0;
             const speed = parseFloat(document.getElementById('input-speed').value) || 1.0;
@@ -1770,6 +1795,7 @@ HTML_CONTENT = """<!DOCTYPE html>
             init3D();
             startSSE();
             initJoyWS();
+            updateMissionTimeDisplay();
             setInterval(pollGamepad, 25);
         };
     </script>
